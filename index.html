@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم الطبية - تطوير د/ السعيد مسعد</title>
 
-  <!-- ربط تطبيق الموبايل (PWA Manifest) -->
   <link rel="manifest" href="manifest.json">
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body class="pb-12 min-h-screen flex flex-col justify-between">
@@ -31,7 +31,7 @@
             <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span></p>
           </div>
         </div>
-        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v3.0 🚀</span>
+        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v3.1 🚀</span>
       </div>
     </header>
 
@@ -51,10 +51,7 @@
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="text-sm font-extrabold text-slate-800">التنقل في لوحة التحكم الرئيسية</h2>
           
-          <!-- Compact Cards Grid -->
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            
-            <!-- Card 1: Drug Assistant -->
             <div onclick="openPage('pageDrug')" class="group cursor-pointer p-3 bg-slate-50 border border-teal-500/30 hover:border-teal-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-teal-600 transition text-xs">↗</span></div>
               <div class="text-2xl my-auto group-hover:scale-110 transition-transform">💊</div>
@@ -64,7 +61,6 @@
               </div>
             </div>
 
-            <!-- Card 2: Alternatives & Generics -->
             <div onclick="openPage('pageAlt')" class="group cursor-pointer p-3 bg-slate-50 border border-emerald-500/30 hover:border-emerald-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-emerald-600 transition text-xs">↗</span></div>
               <div class="text-2xl my-auto group-hover:scale-110 transition-transform">🔄</div>
@@ -74,7 +70,6 @@
               </div>
             </div>
 
-            <!-- Card 3: Hair & Skin Care -->
             <div onclick="openPage('pageDerma')" class="group cursor-pointer p-3 bg-slate-50 border border-sky-500/30 hover:border-sky-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-sky-600 transition text-xs">↗</span></div>
               <div class="text-2xl my-auto group-hover:scale-110 transition-transform">✨</div>
@@ -84,7 +79,6 @@
               </div>
             </div>
 
-            <!-- Card 4: Medical Algorithms -->
             <div onclick="openPage('pageAlgo')" class="group cursor-pointer p-3 bg-slate-50 border border-amber-500/30 hover:border-amber-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-amber-600 transition text-xs">↗</span></div>
               <div class="text-2xl my-auto group-hover:scale-110 transition-transform">🌿</div>
@@ -93,11 +87,9 @@
                 <p class="text-[10px] text-slate-500 font-semibold">(Medical Algorithms)</p>
               </div>
             </div>
-
           </div>
         </div>
 
-        <!-- Quick Search Section -->
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2">
           <h3 class="text-xs font-bold text-slate-700">بحث سريع في الخوارزميات والبروتوكولات:</h3>
           <div class="flex gap-2">
@@ -109,7 +101,7 @@
         </div>
       </div>
 
-      <!-- PAGE 1: DRUG ASSISTANT -->
+      <!-- PAGES SECTIONS -->
       <div id="pageDrug" class="page-content hidden space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي والسؤال عن المنتج</h2>
@@ -117,7 +109,7 @@
             <div>
               <label class="block text-[11px] font-bold text-slate-700 mb-1">اسم الدواء أو السؤال عن المنتج الدوائي:</label>
               <div class="flex gap-2">
-                <input type="text" id="drugSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDrug()" placeholder="مثال: Augmentin 1gm، هل الآيبوبروفين آمن لمريض الضغط؟..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+                <input type="text" id="drugSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDrug()" placeholder="مثال: Augmentin 1gm..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
                 <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-teal-800 transition whitespace-nowrap text-xs">استفسار / بحث 🔍</button>
               </div>
             </div>
@@ -126,14 +118,13 @@
         <div id="aiResultsDrug" class="space-y-4"></div>
       </div>
 
-      <!-- PAGE 2: ALTERNATIVES & GENERICS -->
       <div id="pageAlt" class="page-content hidden space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
           <div>
             <label class="block text-[11px] font-bold text-slate-700 mb-1">اسم الدواء المطلوب بحث بدائله:</label>
             <div class="flex gap-2">
-              <input type="text" id="altSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlternatives()" placeholder="مثال: Panadol, Congestal, Clexane..." class="w-full p-2.5 rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-xs" />
+              <input type="text" id="altSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlternatives()" placeholder="مثال: Panadol..." class="w-full p-2.5 rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-xs" />
               <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-800 transition whitespace-nowrap text-xs">عرض المثائل والبدائل 🔄</button>
             </div>
           </div>
@@ -141,26 +132,24 @@
         <div id="aiResultsAlt" class="space-y-4"></div>
       </div>
 
-      <!-- PAGE 3: HAIR & SKIN -->
       <div id="pageDerma" class="page-content hidden space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> قسم العناية بالشعر والبشرة</h2>
           <label class="block text-[11px] font-bold text-slate-700 mb-1">وصف مشكلة البشرة أو الشعر:</label>
           <div class="flex gap-2">
-            <input type="text" id="dermaSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDerma()" placeholder="مثال: تساقط شعر وراثي، حب شباب هرموني..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+            <input type="text" id="dermaSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDerma()" placeholder="مثال: تساقط شعر وراثي..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
             <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-sky-800 transition whitespace-nowrap text-xs">عرض الحل 💡</button>
           </div>
         </div>
         <div id="aiResultsDerma" class="space-y-4"></div>
       </div>
 
-      <!-- PAGE 4: MEDICAL ALGORITHMS -->
       <div id="pageAlgo" class="page-content hidden space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> قسم الخوارزميات والبروتوكولات الطبية</h2>
-          <label class="block text-[11px] font-bold text-slate-700 mb-1">المشكلة أو الحالة الطبية (Clinical Presentation):</label>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">المشكلة أو الحالة الطبية:</label>
           <div class="flex gap-2">
-            <input type="text" id="algoSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlgorithm()" placeholder="مثال: Hypertension, Acute Asthma Exacerbation..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+            <input type="text" id="algoSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlgorithm()" placeholder="مثال: Hypertension..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
             <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-800 transition whitespace-nowrap text-xs">رسم الخريطة 🗺️</button>
           </div>
         </div>
@@ -170,7 +159,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-200 mt-6 bg-white">
     <p class="font-semibold">تم التطوير بواسطة <span class="text-teal-800 font-extrabold">د/ السعيد مسعد</span> © 2026</p>
   </footer>
@@ -198,8 +186,8 @@
     function openPage(pageId) {
       document.getElementById('pageDashboard').classList.add('hidden');
       document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
-      
-      document.getElementById(pageId).classList.remove('hidden');
+      const targetPage = document.getElementById(pageId);
+      if(targetPage) targetPage.classList.remove('hidden');
       document.getElementById('backBtn').classList.remove('hidden');
     }
 
@@ -234,20 +222,55 @@
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }]
-        })
-      });
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        });
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error.message || 'خطأ في API');
-      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة من السيرفر.');
+        const data = await response.json();
 
-      let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
-      return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+        if (data.error) {
+          const errCode = data.error.code;
+          const errStatus = data.error.status;
+
+          if (errCode === 429 || errStatus === 'RESOURCE_EXHAUSTED' || (data.error.message && data.error.message.includes('quota'))) {
+            handleApiKeyLimitExceeded('⚠️ انتهى الحد الأقصى لاستخدام هذا المفتاح (Quota Limit). يرجى إدخال API Key جديد.');
+            return null;
+          }
+          
+          if (errCode === 400 || errStatus === 'INVALID_ARGUMENT') {
+            handleApiKeyLimitExceeded('❌ مفتاح الـ API غير صالح. يرجى إدخال مفتاح جديد.');
+            return null;
+          }
+
+          throw new Error(data.error.message || 'خطأ في API');
+        }
+
+        if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة من السيرفر.');
+
+        let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
+        return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+
+      } catch (err) {
+        if (err.message && (err.message.includes('Quota') || err.message.includes('limit'))) {
+          handleApiKeyLimitExceeded('⚠️ وصل المفتاح للحد الأقصى. يرجى إدخال مفتاح آخر.');
+          return null;
+        }
+        throw err;
+      }
+    }
+
+    function handleApiKeyLimitExceeded(message) {
+      localStorage.removeItem('gemini_api_key');
+      document.getElementById('apiKeyInput').value = '';
+      const apiKeySection = document.getElementById('apiKeySection');
+      if (apiKeySection) {
+        apiKeySection.style.display = 'flex';
+        apiKeySection.scrollIntoView({ behavior: 'smooth' });
+      }
+      alert(message);
     }
 
     async function askGeminiDrug() {
@@ -260,6 +283,7 @@
       try {
         const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج/الاستفسار", "activeIngredients": ["المادة الفعالة 1"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "طريقة الاستخدام والجرعة الأساسية"}`;
         const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
         currentDrugForPediatric = resJson.name;
 
         let ingredientsHtml = resJson.activeIngredients.map(item => `<li class="flex items-center gap-1.5 text-xs text-gray-800 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span><span>${item}</span></li>`).join('');
@@ -276,10 +300,9 @@
             </div>
             <div class="space-y-2 text-gray-800">
               <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">🎯 الإجابة / دواعي الاستعمال:</p><p>${resJson.indications}</p></div>
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">💊 الجرعة والاستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">💊 الجرعة واستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
             </div>
 
-            <!-- Child Dosage Calculator Section -->
             <div class="bg-sky-50 p-3 rounded-xl border border-sky-200 space-y-2 mt-3">
               <p class="font-bold text-sky-900 text-xs flex items-center gap-1">👶 حاسبة جرعة الأطفال (Pediatric Dose Calculator):</p>
               
@@ -292,12 +315,10 @@
                 </label>
               </div>
 
-              <!-- أدوات الوزن -->
               <div id="pediaWeightGroup" class="flex gap-2">
                 <input type="number" id="pediaWeightInput" placeholder="أدخل وزن الطفل (كجم)..." class="w-full p-2 border border-sky-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-sky-600 bg-white" />
               </div>
 
-              <!-- أدوات العمر -->
               <div id="pediaAgeGroup" class="hidden flex gap-2">
                 <input type="number" id="pediaAgeInput" placeholder="أدخل العمر..." class="w-2/3 p-2 border border-sky-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-sky-600 bg-white" />
                 <select id="pediaAgeUnit" class="w-1/3 p-2 border border-sky-300 rounded-lg text-xs bg-white font-bold text-sky-900">
@@ -310,27 +331,10 @@
               
               <div id="pediatricResult" class="hidden mt-2 p-2.5 bg-white rounded-lg border border-sky-200 text-sky-950 font-bold text-xs"></div>
             </div>
-
           </div>`;
       } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
     }
 
     function togglePediaInputs() {
       const type = document.querySelector('input[name="pediaCalcType"]:checked').value;
-      if (type === 'weight') {
-        document.getElementById('pediaWeightGroup').classList.remove('hidden');
-        document.getElementById('pediaAgeGroup').classList.add('hidden');
-      } else {
-        document.getElementById('pediaWeightGroup').classList.add('hidden');
-        document.getElementById('pediaAgeGroup').classList.remove('hidden');
-      }
-    }
-
-    async function calculatePediatricDose() {
-      const type = document.querySelector('input[name="pediaCalcType"]:checked').value;
-      const resContainer = document.getElementById('pediatricResult');
-      let finalWeight = 0;
-      let estInfo = "";
-
-      if (type === 'weight') {
-        finalWeight = parseFloat(docume
+ 
