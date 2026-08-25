@@ -1,14 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الطبية والصيدلانية - د/ السعيد مسعد</title>
+  <title>لوحة التحكم الطبية والصيدلانية - د/ السعيد مسعد v3.6</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; color: #0f172a; }
-    .hidden { display: none !important; }
+    .page-content { display: none; }
+    .page-content.active { display: block !important; }
+    .dash-page { display: block; }
+    .dash-page.hidden-dash { display: none !important; }
   </style>
 </head>
 <body class="pb-12 min-h-screen flex flex-col justify-between">
@@ -44,46 +48,46 @@
       </div>
 
       <!-- MAIN DASHBOARD PAGE -->
-      <div id="pageDashboard" class="space-y-4">
+      <div id="pageDashboard" class="dash-page space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="text-sm font-extrabold text-slate-800">التنقل في لوحة التحكم الرئيسية</h2>
           
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div id="btnDrug" onclick="openPage('pageDrug')" class="group cursor-pointer p-3 bg-slate-50 border border-teal-500/30 hover:border-teal-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28">
+            <button onclick="openPage('pageDrug')" class="group p-3 bg-slate-50 border border-teal-500/30 hover:border-teal-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-teal-600 text-xs">↗</span></div>
               <div class="text-2xl my-auto">💊</div>
               <div>
                 <h3 class="font-bold text-xs text-slate-800">المساعد الدوائي</h3>
                 <p class="text-[10px] text-slate-500 font-semibold">(Drug Assistant)</p>
               </div>
-            </div>
+            </button>
 
-            <div id="btnAlt" onclick="openPage('pageAlt')" class="group cursor-pointer p-3 bg-slate-50 border border-emerald-500/30 hover:border-emerald-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28">
+            <button onclick="openPage('pageAlt')" class="group p-3 bg-slate-50 border border-emerald-500/30 hover:border-emerald-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-emerald-600 text-xs">↗</span></div>
               <div class="text-2xl my-auto">🔄</div>
               <div>
                 <h3 class="font-bold text-xs text-slate-800">المثائل والبدائل</h3>
                 <p class="text-[10px] text-slate-500 font-semibold">(Generics & Substitutes)</p>
               </div>
-            </div>
+            </button>
 
-            <div id="btnDerma" onclick="openPage('pageDerma')" class="group cursor-pointer p-3 bg-slate-50 border border-sky-500/30 hover:border-sky-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28">
+            <button onclick="openPage('pageDerma')" class="group p-3 bg-slate-50 border border-sky-500/30 hover:border-sky-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-sky-600 text-xs">↗</span></div>
               <div class="text-2xl my-auto">✨</div>
               <div>
                 <h3 class="font-bold text-xs text-slate-800">الشعر والبشرة</h3>
                 <p class="text-[10px] text-slate-500 font-semibold">(Hair & Skin Care)</p>
               </div>
-            </div>
+            </button>
 
-            <div id="btnAlgo" onclick="openPage('pageAlgo')" class="group cursor-pointer p-3 bg-slate-50 border border-amber-500/30 hover:border-amber-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28">
+            <button onclick="openPage('pageAlgo')" class="group p-3 bg-slate-50 border border-amber-500/30 hover:border-amber-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
               <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-amber-600 text-xs">↗</span></div>
               <div class="text-2xl my-auto">🌿</div>
               <div>
                 <h3 class="font-bold text-xs text-slate-800">الخوارزميات الطبية</h3>
                 <p class="text-[10px] text-slate-500 font-semibold">(Medical Algorithms)</p>
               </div>
-            </div>
+            </button>
           </div>
         </div>
 
@@ -99,7 +103,7 @@
       </div>
 
       <!-- PAGE SECTIONS -->
-      <div id="pageDrug" class="page-content hidden space-y-4">
+      <div id="pageDrug" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي والسؤال عن المنتج</h2>
           <div class="flex gap-2">
@@ -110,7 +114,7 @@
         <div id="aiResultsDrug" class="space-y-4"></div>
       </div>
 
-      <div id="pageAlt" class="page-content hidden space-y-4">
+      <div id="pageAlt" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
           <div class="flex gap-2">
@@ -121,7 +125,7 @@
         <div id="aiResultsAlt" class="space-y-4"></div>
       </div>
 
-      <div id="pageDerma" class="page-content hidden space-y-4">
+      <div id="pageDerma" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> قسم العناية بالشعر والبشرة</h2>
           <div class="flex gap-2">
@@ -132,7 +136,7 @@
         <div id="aiResultsDerma" class="space-y-4"></div>
       </div>
 
-      <div id="pageAlgo" class="page-content hidden space-y-4">
+      <div id="pageAlgo" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
           <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> قسم الخوارزميات والبروتوكولات الطبية</h2>
           <div class="flex gap-2">
@@ -175,20 +179,28 @@
     }
 
     function openPage(pageId) {
-      document.getElementById('pageDashboard').classList.add('hidden');
-      document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('pageDashboard').classList.add('hidden-dash');
+      const pages = document.querySelectorAll('.page-content');
+      for(let i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+      }
       const targetPage = document.getElementById(pageId);
       if(targetPage) {
-        targetPage.classList.remove('hidden');
+        targetPage.classList.add('active');
       }
-      document.getElementById('backBtn').classList.remove('hidden');
+      const backBtn = document.getElementById('backBtn');
+      if(backBtn) backBtn.classList.remove('hidden');
       window.scrollTo(0,0);
     }
 
     function showDashboard() {
-      document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById('pageDashboard').classList.remove('hidden');
-      document.getElementById('backBtn').classList.add('hidden');
+      const pages = document.querySelectorAll('.page-content');
+      for(let i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+      }
+      document.getElementById('pageDashboard').classList.remove('hidden-dash');
+      const backBtn = document.getElementById('backBtn');
+      if(backBtn) backBtn.classList.add('hidden');
       window.scrollTo(0,0);
     }
 
@@ -214,24 +226,15 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      // استخدام موديل 2.5 flash المباشر والرسمي
-      const primaryUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      // استخدام موديل 1.5-flash المستقر لتجنب خطأ التوقف الموضح بالصورة
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
       try {
-        let response = await fetch(primaryUrl, {
+        const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
         });
-
-        if (!response.ok) {
-          response = await fetch(fallbackUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-          });
-        }
 
         const data = await response.json();
 
@@ -347,4 +350,4 @@
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
         let productsHtml = resJson.egyptianProducts.map(p => `<div class="p-2 bg-sky-50 rounded-lg border border-sky-200"><span class="font-bold text-xs">${p.name}</span> (${p.category}) - ${p.note}</div>`).join('');
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs"><p>🔬 <strong>ال
+        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs"><p>🔬 <strong>السبب والتشخيص:</strong> ${resJson.diagnosisAndCause}</p><div class="space-y-1"><p class="f
