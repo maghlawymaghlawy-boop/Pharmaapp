@@ -1,31 +1,391 @@
-async function fetchGemini(promptText) {
-  const apiKey = getApiKey();
-  if(!apiKey) {
-    alert("يرجى إدخال API Key أولاً.");
-    return null;
-  }
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم الطبية والصيدلانية - د/ السعيد مسعد v3.8</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+    .page-content { display: none; }
+    .page-content.active { display: block !important; }
+    .dash-page { display: block; }
+    .dash-page.hidden-dash { display: none !important; }
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #e2e8f0;
+      border-top: 3px solid #0d9488;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="pb-12 min-h-screen flex flex-col justify-between">
 
-  // التعديل هنا: استخدام gemini-2.5-flash
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  <div>
+    <!-- Header -->
+    <header class="bg-teal-900 text-white p-4 shadow-xl sticky top-0 z-50">
+      <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+        <div class="flex items-center gap-3">
+          <button id="backBtn" onclick="showDashboard()" class="hidden bg-teal-800 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1">
+            <span>➡️</span> العودة للرئيسية
+          </button>
+          <div>
+            <h1 id="headerTitle" class="text-lg font-black flex items-center gap-2">
+              <span>🩺</span> لوحة التحكم الطبية والصيدلانية
+            </h1>
+            <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span></p>
+          </div>
+        </div>
+        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">v3.8 🚀</span>
+      </div>
+    </header>
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: promptText }] }],
-        generationConfig: { responseMimeType: "application/json" }
-      })
-    });
+    <div class="max-w-4xl mx-auto p-4 space-y-4">
 
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
+      <!-- API Key Section -->
+      <div id="apiKeySection" class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs flex flex-col gap-2 shadow-sm">
+        <span class="font-bold text-amber-900">⚠️ إعدادات الربط بـ Gemini:</span>
+        <div class="flex gap-2 flex-wrap">
+          <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." class="flex-1 p-2.5 border border-amber-300 rounded-xl w-full text-xs bg-white focus:outline-none focus:ring-2 focus:ring-teal-600 min-w-[200px]" />
+          <button id="saveKeyBtn" onclick="saveApiKey()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-amber-800 transition text-xs">حفظ المفتاح</button>
+          <button onclick="testApiConnection()" class="bg-teal-600 text-white px-4 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-teal-700 transition text-xs">🧪 اختبار الاتصال</button>
+        </div>
+        <div id="testResult" class="text-xs font-semibold mt-1"></div>
+      </div>
 
-    const rawText = data.candidates[0].content.parts[0].text;
-    return JSON.parse(rawText);
+      <!-- MAIN DASHBOARD PAGE -->
+      <div id="pageDashboard" class="dash-page space-y-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+          <h2 class="text-sm font-extrabold text-slate-800">التنقل في لوحة التحكم الرئيسية</h2>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button onclick="openPage('pageDrug')" class="group p-3 bg-slate-50 border border-teal-500/30 hover:border-teal-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
+              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-teal-600 text-xs">↗</span></div>
+              <div class="text-2xl my-auto">💊</div>
+              <div>
+                <h3 class="font-bold text-xs text-slate-800">المساعد الدوائي</h3>
+                <p class="text-[10px] text-slate-500 font-semibold">(Drug Assistant)</p>
+              </div>
+            </button>
 
-  } catch (err) {
-    console.error("Gemini API Error:", err);
-    throw err;
-  }
-}
+            <button onclick="openPage('pageAlt')" class="group p-3 bg-slate-50 border border-emerald-500/30 hover:border-emerald-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
+              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-emerald-600 text-xs">↗</span></div>
+              <div class="text-2xl my-auto">🔄</div>
+              <div>
+                <h3 class="font-bold text-xs text-slate-800">المثائل والبدائل</h3>
+                <p class="text-[10px] text-slate-500 font-semibold">(Generics & Substitutes)</p>
+              </div>
+            </button>
+
+            <button onclick="openPage('pageDerma')" class="group p-3 bg-slate-50 border border-sky-500/30 hover:border-sky-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
+              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-sky-600 text-xs">↗</span></div>
+              <div class="text-2xl my-auto">✨</div>
+              <div>
+                <h3 class="font-bold text-xs text-slate-800">الشعر والبشرة</h3>
+                <p class="text-[10px] text-slate-500 font-semibold">(Hair & Skin Care)</p>
+              </div>
+            </button>
+
+            <button onclick="openPage('pageAlgo')" class="group p-3 bg-slate-50 border border-amber-500/30 hover:border-amber-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center h-28 w-full">
+              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-amber-600 text-xs">↗</span></div>
+              <div class="text-2xl my-auto">🌿</div>
+              <div>
+                <h3 class="font-bold text-xs text-slate-800">الخوارزميات الطبية</h3>
+                <p class="text-[10px] text-slate-500 font-semibold">(Medical Algorithms)</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE SECTIONS -->
+      <div id="pageDrug" class="page-content space-y-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+          <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي</h2>
+          <div class="flex gap-2 flex-wrap">
+            <input type="text" id="drugSearchInput" placeholder="مثال: Augmentin 1g..." class="flex-1 p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs min-w-[200px]" />
+            <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-teal-800 transition">بحث 🔍</button>
+          </div>
+        </div>
+        <div id="aiResultsDrug" class="space-y-4"></div>
+      </div>
+
+      <div id="pageAlt" class="page-content space-y-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+          <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم البدائل</h2>
+          <div class="flex gap-2 flex-wrap">
+            <input type="text" id="altSearchInput" placeholder="مثال: Congestal..." class="flex-1 p-2.5 rounded-xl border border-emerald-200 focus:outline-none text-xs min-w-[200px]" />
+            <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-800 transition">عرض 🔄</button>
+          </div>
+        </div>
+        <div id="aiResultsAlt" class="space-y-4"></div>
+      </div>
+
+      <div id="pageDerma" class="page-content space-y-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+          <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> البشرة والشعر</h2>
+          <div class="flex gap-2 flex-wrap">
+            <input type="text" id="dermaSearchInput" placeholder="مثال: حب الشباب..." class="flex-1 p-2.5 rounded-xl border border-sky-200 focus:outline-none text-xs min-w-[200px]" />
+            <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-sky-800 transition">تحليل 💡</button>
+          </div>
+        </div>
+        <div id="aiResultsDerma" class="space-y-4"></div>
+      </div>
+
+      <div id="pageAlgo" class="page-content space-y-4">
+        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+          <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> الخوارزميات</h2>
+          <div class="flex gap-2 flex-wrap">
+            <input type="text" id="algoSearchInput" placeholder="مثال: Asthma management..." class="flex-1 p-2.5 rounded-xl border border-amber-200 focus:outline-none text-xs min-w-[200px]" />
+            <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-amber-800 transition">رسم 🗺️</button>
+          </div>
+        </div>
+        <div id="aiResultsAlgo" class="space-y-4"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ===================== التهيئة عند تحميل الصفحة =====================
+    window.onload = function() {
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if(savedKey && savedKey.length > 10) {
+        document.getElementById('apiKeyInput').value = savedKey;
+        document.getElementById('apiKeySection').style.display = 'none';
+      }
+    };
+
+    // ===================== إدارة المفتاح =====================
+    function saveApiKey() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if(key.length > 10) {
+        localStorage.setItem('gemini_api_key', key);
+        document.getElementById('apiKeySection').style.display = 'none';
+        document.getElementById('testResult').innerHTML = '✅ تم حفظ المفتاح بنجاح!';
+        document.getElementById('testResult').className = 'text-xs font-semibold mt-1 text-green-700';
+      } else {
+        alert('⚠️ يرجى إدخال مفتاح صحيح (أكثر من 10 أحرف)');
+      }
+    }
+
+    function getApiKey() {
+      return localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
+    }
+
+    // ===================== اختبار الاتصال =====================
+    async function testApiConnection() {
+      const apiKey = getApiKey();
+      if(!apiKey) {
+        document.getElementById('testResult').innerHTML = '⚠️ يرجى إدخال المفتاح أولاً';
+        document.getElementById('testResult').className = 'text-xs font-semibold mt-1 text-amber-700';
+        return;
+      }
+
+      document.getElementById('testResult').innerHTML = '⏳ جاري اختبار الاتصال...';
+      document.getElementById('testResult').className = 'text-xs font-semibold mt-1 text-teal-700';
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: 'قل لي "مرحباً" فقط بالعربية' }] }],
+            generationConfig: { temperature: 0.7 }
+          })
+        });
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+
+        const reply = data.candidates[0].content.parts[0].text;
+        document.getElementById('testResult').innerHTML = `✅ الاتصال ناجح! الرد: "${reply}"`;
+        document.getElementById('testResult').className = 'text-xs font-semibold mt-1 text-green-700';
+      } catch (err) {
+        document.getElementById('testResult').innerHTML = `❌ فشل الاتصال: ${err.message}`;
+        document.getElementById('testResult').className = 'text-xs font-semibold mt-1 text-red-700';
+      }
+    }
+
+    // ===================== التنقل بين الصفحات =====================
+    function openPage(pageId) {
+      document.getElementById('pageDashboard').classList.add('hidden-dash');
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      document.getElementById('backBtn').classList.remove('hidden');
+    }
+
+    function showDashboard() {
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+      document.getElementById('pageDashboard').classList.remove('hidden-dash');
+      document.getElementById('backBtn').classList.add('hidden');
+    }
+
+    // ===================== الدالة الأساسية للاتصال بـ Gemini =====================
+    async function fetchGemini(promptText) {
+      const apiKey = getApiKey();
+      if(!apiKey) {
+        alert("⚠️ يرجى إدخال Gemini API Key أولاً.");
+        return null;
+      }
+
+      // استخدام النموذج المستقر gemini-1.5-flash
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { 
+              temperature: 0.7,
+              maxOutputTokens: 1024
+            }
+          })
+        });
+
+        const data = await response.json();
+        
+        // التحقق من وجود خطأ
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
+
+        // التحقق من وجود محتوى
+        if (!data.candidates || data.candidates.length === 0) {
+          throw new Error('لم يتم استلام أي رد من النموذج');
+        }
+
+        const rawText = data.candidates[0].content.parts[0].text;
+        
+        // محاولة تحويل النص إلى JSON
+        try {
+          return JSON.parse(rawText);
+        } catch (jsonError) {
+          // لو مش JSON، حاول تستخرج JSON من النص
+          const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try {
+              return JSON.parse(jsonMatch[0]);
+            } catch (e) {
+              throw new Error('النموذج لم يعد بتنسيق JSON صحيح');
+            }
+          }
+          throw new Error('النموذج لم يعد بتنسيق JSON صحيح');
+        }
+
+      } catch (err) {
+        console.error("Gemini API Error:", err);
+        throw err;
+      }
+    }
+
+    // ===================== وظيفة مساعدة لعرض النتائج =====================
+    function showLoading(containerId) {
+      document.getElementById(containerId).innerHTML = `
+        <div class="bg-white p-6 rounded-xl text-center text-xs">
+          <div class="loading-spinner mx-auto mb-2"></div>
+          <span class="text-slate-600">⏳ جاري التحليل... يرجى الانتظار</span>
+        </div>
+      `;
+    }
+
+    function showError(containerId, message) {
+      document.getElementById(containerId).innerHTML = `
+        <div class="bg-red-50 border border-red-200 p-4 rounded-xl text-red-700 text-xs">
+          <strong>❌ خطأ:</strong> ${message}
+          <div class="mt-2 text-slate-600 text-[10px]">تأكد من صحة المفتاح واتصال الإنترنت</div>
+        </div>
+      `;
+    }
+
+    // ===================== 1. المساعد الدوائي =====================
+    async function askGeminiDrug() {
+      const query = document.getElementById('drugSearchInput').value.trim();
+      if(!query) return alert('⚠️ يرجى إدخال اسم الدواء');
+
+      showLoading('aiResultsDrug');
+      try {
+        const prompt = `أنت صيدلي خبير. أرجع JSON فقط بهذا الشكل لـ "${query}": {"name": "الاسم", "activeIngredients": ["المادة الفعالة 1", "المادة الفعالة 2"], "indications": "دواعي الاستعمال بالعربية", "dosageAndUsage": "الجرعة وطريقة الاستخدام بالعربية"}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
+
+        let ing = res.activeIngredients ? res.activeIngredients.map(i => `<li class="mr-4">• ${i}</li>`).join('') : '<li class="mr-4">• غير متوفر</li>';
+        document.getElementById('aiResultsDrug').innerHTML = `
+          <div class="bg-white p-5 rounded-2xl space-y-3 text-xs border border-teal-200 shadow-sm">
+            <h3 class="font-bold text-base text-teal-800">💊 ${res.name || 'غير متوفر'}</h3>
+            <div><strong class="text-teal-700">🧪 المكونات النشطة:</strong> <ul class="mt-1">${ing}</ul></div>
+            <div><strong class="text-teal-700">📋 دواعي الاستعمال:</strong> ${res.indications || 'غير متوفر'}</div>
+            <div><strong class="text-teal-700">💉 الجرعة وطريقة الاستخدام:</strong> ${res.dosageAndUsage || 'غير متوفر'}</div>
+          </div>
+        `;
+      } catch(e) {
+        showError('aiResultsDrug', e.message);
+      }
+    }
+
+    // ===================== 2. المثائل والبدائل =====================
+    async function askGeminiAlternatives() {
+      const query = document.getElementById('altSearchInput').value.trim();
+      if(!query) return alert('⚠️ يرجى إدخال اسم الدواء');
+
+      showLoading('aiResultsAlt');
+      try {
+        const prompt = `أرجع JSON فقط للبدائل والمثائل للدواء "${query}": {"generics": ["مثيل 1", "مثيل 2"], "substitutes": ["بديل 1", "بديل 2"]}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
+
+        let gen = res.generics ? res.generics.map(i => `<li class="mr-4">• ${i}</li>`).join('') : '<li class="mr-4">• لا يوجد مثائل</li>';
+        let sub = res.substitutes ? res.substitutes.map(i => `<li class="mr-4">• ${i}</li>`).join('') : '<li class="mr-4">• لا يوجد بدائل</li>';
+        document.getElementById('aiResultsAlt').innerHTML = `
+          <div class="bg-white p-5 rounded-2xl space-y-3 text-xs border border-emerald-200 shadow-sm">
+            <h3 class="font-bold text-base text-emerald-800">🔄 البدائل والمثائل لـ "${query}"</h3>
+            <div><strong class="text-emerald-700">🧬 المثائل (Generics):</strong> <ul class="mt-1">${gen}</ul></div>
+            <div><strong class="text-emerald-700">🔄 البدائل (Substitutes):</strong> <ul class="mt-1">${sub}</ul></div>
+          </div>
+        `;
+      } catch(e) {
+        showError('aiResultsAlt', e.message);
+      }
+    }
+
+    // ===================== 3. البشرة والشعر =====================
+    async function askGeminiDerma() {
+      const query = document.getElementById('dermaSearchInput').value.trim();
+      if(!query) return alert('⚠️ يرجى إدخال المشكلة');
+
+      showLoading('aiResultsDerma');
+      try {
+        const prompt = `أنت طبيب جلدية. أرجع JSON فقط للحالة "${query}": {"diagnosisAndCause": "السبب والتشخيص بالعربية", "egyptianProducts": [{"name": "اسم المنتج", "category": "النوع", "note": "ملاحظة"}]}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
+
+        let prod = res.egyptianProducts ? res.egyptianProducts.map(p => 
+          `<div class="mr-4 p-2 bg-sky-50 rounded-lg mb-1">• <strong>${p.name || 'غير متوفر'}</strong> (${p.category || 'غير محدد'}) - ${p.note || ''}</div>`
+        ).join('') : '<div class="mr-4">• لا توجد منتجات محددة</div>';
+        
+        document.getElementById('aiResultsDerma').innerHTML = `
+          <div class="bg-white p-5 rounded-2xl space-y-3 text-xs border border-sky-200 shadow-sm">
+            <h3 class="font-bold text-base text-sky-800">✨ تحليل حالة: "${query}"</h3>
+            <div><strong class="text-sky-700">🔬 التشخيص والسبب:</strong> ${res.diagnosisAndCause || 'غير متوفر'}</div>
+            <div><strong class="text-sky-700">🧴 المنتجات المتاحة:</strong> <div class="mt-1">${prod}</div></div>
+          </div>
+        `;
+      } catch(e) {
+        showError('aiResultsDerma', e.message);
+      }
+    }
+
+    // ===================== 4. الخوارزميات الطبية =====================
+    async function askGeminiAlgorithm() {
+      const query =
