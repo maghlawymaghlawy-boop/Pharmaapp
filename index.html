@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الطبية والصيدلانية - د/ السعيد مسعد v3.6</title>
+  <title>لوحة التحكم الطبية والصيدلانية - د/ السعيد مسعد v3.7</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -32,7 +31,7 @@
             <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span></p>
           </div>
         </div>
-        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v3.6 🚀</span>
+        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">v3.7 🚀</span>
       </div>
     </header>
 
@@ -40,7 +39,7 @@
 
       <!-- API Key Section -->
       <div id="apiKeySection" class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs flex flex-col gap-2 shadow-sm">
-        <span class="font-bold text-amber-900">⚠️ إعدادات الربط بـ Gemini (مطلوبة مرة واحدة):</span>
+        <span class="font-bold text-amber-900">⚠️ إعدادات الربط بـ Gemini:</span>
         <div class="flex gap-2">
           <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." class="p-2.5 border border-amber-300 rounded-xl w-full text-xs bg-white focus:outline-none focus:ring-2 focus:ring-teal-600" />
           <button id="saveKeyBtn" onclick="saveApiKey()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-amber-800 transition">حفظ المفتاح</button>
@@ -90,25 +89,15 @@
             </button>
           </div>
         </div>
-
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2">
-          <h3 class="text-xs font-bold text-slate-700">بحث سريع في الخوارزميات والبروتوكولات:</h3>
-          <div class="flex gap-2">
-            <input type="text" id="quickSearchInput" onkeyup="if(event.key === 'Enter') handleQuickSearch()" placeholder="مثال: Hypertension, Diabetes..." class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
-            <button onclick="handleQuickSearch()" class="bg-teal-800 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-teal-900 transition whitespace-nowrap text-xs flex items-center gap-1">
-              <span>🔍</span> بحث
-            </button>
-          </div>
-        </div>
       </div>
 
       <!-- PAGE SECTIONS -->
       <div id="pageDrug" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي والسؤال عن المنتج</h2>
+          <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي</h2>
           <div class="flex gap-2">
-            <input type="text" id="drugSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDrug()" placeholder="مثال: Hibiotic 457..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs" />
-            <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">استفسار 🔍</button>
+            <input type="text" id="drugSearchInput" placeholder="مثال: Augmentin 1g..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs" />
+            <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">بحث 🔍</button>
           </div>
         </div>
         <div id="aiResultsDrug" class="space-y-4"></div>
@@ -116,10 +105,10 @@
 
       <div id="pageAlt" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
+          <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم البدائل</h2>
           <div class="flex gap-2">
-            <input type="text" id="altSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlternatives()" placeholder="مثال: Augmentin..." class="w-full p-2.5 rounded-xl border border-emerald-200 focus:outline-none text-xs" />
-            <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">عرض البدائل 🔄</button>
+            <input type="text" id="altSearchInput" placeholder="مثال: Congestal..." class="w-full p-2.5 rounded-xl border border-emerald-200 focus:outline-none text-xs" />
+            <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">عرض 🔄</button>
           </div>
         </div>
         <div id="aiResultsAlt" class="space-y-4"></div>
@@ -127,10 +116,10 @@
 
       <div id="pageDerma" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> قسم العناية بالشعر والبشرة</h2>
+          <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> البشرة والشعر</h2>
           <div class="flex gap-2">
-            <input type="text" id="dermaSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDerma()" placeholder="مثال: حب الشباب، تساقط شعر..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs" />
-            <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">عرض الحل 💡</button>
+            <input type="text" id="dermaSearchInput" placeholder="مثال: حب الشباب..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs" />
+            <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">تحليل 💡</button>
           </div>
         </div>
         <div id="aiResultsDerma" class="space-y-4"></div>
@@ -138,10 +127,10 @@
 
       <div id="pageAlgo" class="page-content space-y-4">
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> قسم الخوارزميات والبروتوكولات الطبية</h2>
+          <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> الخوارزميات</h2>
           <div class="flex gap-2">
-            <input type="text" id="algoSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlgorithm()" placeholder="مثال: Hypertension..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs" />
-            <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">رسم الخريطة 🗺️</button>
+            <input type="text" id="algoSearchInput" placeholder="مثال: Asthma management..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs" />
+            <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs">رسم 🗺️</button>
           </div>
         </div>
         <div id="aiResultsAlgo" class="space-y-4"></div>
@@ -150,134 +139,70 @@
     </div>
   </div>
 
-  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-200 mt-6 bg-white">
-    <p class="font-semibold">تم التطوير بواسطة <span class="text-teal-800 font-extrabold">د/ السعيد مسعد</span> © 2026</p>
-  </footer>
-
   <script>
-    let currentDrugForPediatric = "";
-
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey && savedKey.length > 5) {
         document.getElementById('apiKeyInput').value = savedKey;
         document.getElementById('apiKeySection').style.display = 'none';
-      } else {
-        document.getElementById('apiKeySection').style.display = 'flex';
       }
     };
 
     function saveApiKey() {
       const key = document.getElementById('apiKeyInput').value.trim();
-      if(key && key.length > 5) {
+      if(key.length > 5) {
         localStorage.setItem('gemini_api_key', key);
         document.getElementById('apiKeySection').style.display = 'none';
-        alert('تم حفظ المفتاح بنجاح! 🚀');
-      } else { 
-        alert('من فضلك أدخل مفتاح صحيح.'); 
+        alert('تم حفظ المفتاح! 🚀');
       }
     }
 
     function openPage(pageId) {
       document.getElementById('pageDashboard').classList.add('hidden-dash');
-      const pages = document.querySelectorAll('.page-content');
-      for(let i = 0; i < pages.length; i++) {
-        pages[i].classList.remove('active');
-      }
-      const targetPage = document.getElementById(pageId);
-      if(targetPage) {
-        targetPage.classList.add('active');
-      }
-      const backBtn = document.getElementById('backBtn');
-      if(backBtn) backBtn.classList.remove('hidden');
-      window.scrollTo(0,0);
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      document.getElementById('backBtn').classList.remove('hidden');
     }
 
     function showDashboard() {
-      const pages = document.querySelectorAll('.page-content');
-      for(let i = 0; i < pages.length; i++) {
-        pages[i].classList.remove('active');
-      }
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
       document.getElementById('pageDashboard').classList.remove('hidden-dash');
-      const backBtn = document.getElementById('backBtn');
-      if(backBtn) backBtn.classList.add('hidden');
-      window.scrollTo(0,0);
-    }
-
-    function handleQuickSearch() {
-      const val = document.getElementById('quickSearchInput').value.trim();
-      if(val) {
-        openPage('pageAlgo');
-        document.getElementById('algoSearchInput').value = val;
-        askGeminiAlgorithm();
-      }
+      document.getElementById('backBtn').classList.add('hidden');
     }
 
     function getApiKey() {
-      const key = localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
-      if(!key) {
-        handleApiKeyLimitExceeded('برجاء إدخال وحفظ Gemini API Key أولاً.');
-        return null;
-      }
-      return key;
+      return localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
     }
 
     async function fetchGemini(promptText) {
       const apiKey = getApiKey();
-      if(!apiKey) return null;
+      if(!apiKey) {
+        alert("يرجى إدخال API Key أولاً.");
+        return null;
+      }
 
-      // استخدام موديل 1.5-flash المستقر لتجنب خطأ التوقف الموضح بالصورة
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
       try {
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { responseMimeType: "application/json" } // إجبار الموديل على إرجاع JSON فقط
+          })
         });
 
         const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
 
-        if (data.error) {
-          const errCode = data.error.code;
-          const errStatus = data.error.status;
-
-          if (errCode === 429 || errStatus === 'RESOURCE_EXHAUSTED' || (data.error.message && data.error.message.includes('quota'))) {
-            handleApiKeyLimitExceeded('⚠️ انتهى الحد الأقصى لاستخدام هذا المفتاح (Quota Limit). يرجى إدخال API Key جديد.');
-            return null;
-          }
-          
-          if (errCode === 400 || errStatus === 'INVALID_ARGUMENT') {
-            handleApiKeyLimitExceeded('❌ مفتاح الـ API غير صالح.');
-            return null;
-          }
-
-          throw new Error(data.error.message || 'خطأ في API');
-        }
-
-        if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة.');
-
-        let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
-        return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+        const rawText = data.candidates[0].content.parts[0].text;
+        return JSON.parse(rawText);
 
       } catch (err) {
-        if (err.message && (err.message.includes('Quota') || err.message.includes('limit'))) {
-          handleApiKeyLimitExceeded('⚠️ وصل المفتاح للحد الأقصى. يرجى إدخال مفتاح آخر.');
-          return null;
-        }
+        console.error("Gemini API Error:", err);
         throw err;
       }
-    }
-
-    function handleApiKeyLimitExceeded(message) {
-      localStorage.removeItem('gemini_api_key');
-      document.getElementById('apiKeyInput').value = '';
-      const apiKeySection = document.getElementById('apiKeySection');
-      if (apiKeySection) {
-        apiKeySection.style.display = 'flex';
-        apiKeySection.scrollIntoView({ behavior: 'smooth' });
-      }
-      alert(message);
     }
 
     async function askGeminiDrug() {
@@ -285,42 +210,22 @@
       const container = document.getElementById('aiResultsDrug');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold text-xs">⏳ جارِ التحليل...</div>`;
+      container.innerHTML = `<div class="bg-white p-4 rounded-xl text-center text-xs">⏳ جاري التحليل...</div>`;
       try {
-        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-        currentDrugForPediatric = resJson.name;
-        let ingredientsHtml = resJson.activeIngredients.map(item => `<li class="text-xs text-gray-800 font-medium">• ${item}</li>`).join('');
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 space-y-3 text-xs">
-          <h3 class="font-extrabold text-base text-teal-900">${resJson.name}</h3>
-          <div class="bg-teal-50 p-2.5 rounded-xl"><p class="font-bold text-teal-900">🧪 المكونات:</p><ul>${ingredientsHtml}</ul></div>
-          <div class="space-y-2"><p>🎯 <strong>دواعي الاستعمال:</strong> ${resJson.indications}</p><p>💊 <strong>الجرعة:</strong> ${resJson.dosageAndUsage}</p></div>
-          
-          <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl space-y-2">
-            <h4 class="font-bold text-amber-900 text-xs">👶 حاسبة جرعة الأطفال (تقديرية):</h4>
-            <div class="flex gap-2">
-              <input type="number" id="pediatricWeight" placeholder="الوزن كجم..." class="p-2 border rounded-lg w-1/2 text-xs" />
-              <button onclick="calcPediatricDosage()" class="bg-amber-700 text-white px-3 py-2 rounded-lg font-bold text-xs">احسب الجرعة</button>
-            </div>
-            <div id="pediatricResult" class="font-semibold text-amber-900 text-xs"></div>
-          </div>
-        </div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs font-bold text-center">❌ حدث خطأ: ${err.message}</div>`; }
-    }
+        const prompt = `أنت صيدلي خبير. أرجع JSON فقط بهذا الشكل لـ "${query}": {"name": "الاسم", "activeIngredients": ["المادة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
 
-    async function calcPediatricDosage() {
-      const weight = document.getElementById('pediatricWeight').value;
-      const resDiv = document.getElementById('pediatricResult');
-      if(!weight || !currentDrugForPediatric) return;
-      resDiv.innerHTML = "⏳ جارِ الإرسال للذكاء الاصطناعي...";
-      try {
-        const prompt = `أحسب الجرعة المناسبة للأطفال للدواء: "${currentDrugForPediatric}" لطفل وزنه ${weight} كجم. أرجع JSON بالصيغة: {"calculatedDosage": "الجرعة المقترحة بالمليلتر والعدَد"}`;
-        const data = await fetchGemini(prompt);
-        if(data && data.calculatedDosage) {
-          resDiv.innerHTML = `✅ ${data.calculatedDosage}`;
-        }
-      } catch(e) { resDiv.innerHTML = "❌ تعذر الحساب"; }
+        let ing = res.activeIngredients.map(i => `<li>• ${i}</li>`).join('');
+        container.innerHTML = `<div class="bg-white p-4 rounded-xl space-y-2 text-xs border">
+          <h3 class="font-bold text-sm text-teal-800">${res.name}</h3>
+          <p><strong>المكونات:</strong> <ul>${ing}</ul></p>
+          <p><strong>دواعي الاستعمال:</strong> ${res.indications}</p>
+          <p><strong>الجرعة:</strong> ${res.dosageAndUsage}</p>
+        </div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="bg-red-50 p-3 rounded-xl text-red-600 text-xs">❌ خطأ: ${e.message}</div>`;
+      }
     }
 
     async function askGeminiAlternatives() {
@@ -328,15 +233,21 @@
       const container = document.getElementById('aiResultsAlt');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold text-xs">⏳ جارِ استخراج البدائل...</div>`;
+      container.innerHTML = `<div class="bg-white p-4 rounded-xl text-center text-xs">⏳ جاري التحميل...</div>`;
       try {
-        const prompt = `أنت صيدلي خبير. اخرج المثائل (Generics) والبدائل (Substitutes) للدواء: "${query}". أرجع JSON: {"generics": ["مثيل 1"], "substitutes": ["بديل 1"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-        let genHtml = resJson.generics.map(item => `<li class="p-1.5 bg-emerald-50 rounded-lg font-bold text-xs">• ${item}</li>`).join('');
-        let subHtml = resJson.substitutes.map(item => `<li class="p-1.5 bg-teal-50 rounded-lg font-bold text-xs">• ${item}</li>`).join('');
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-200 space-y-3"><h3 class="font-bold text-xs text-emerald-900">🧪 المثائل (Generics):</h3><ul>${genHtml}</ul><h3 class="font-bold text-xs text-teal-900">🔄 البدائل (Substitutes):</h3><ul>${subHtml}</ul></div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs font-bold text-center">❌ حدث خطأ: ${err.message}</div>`; }
+        const prompt = `أرجع JSON فقط للبدائل والمثائل للدواء "${query}": {"generics": ["مثيل 1"], "substitutes": ["بديل 1"]}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
+
+        let gen = res.generics.map(i => `<li>• ${i}</li>`).join('');
+        let sub = res.substitutes.map(i => `<li>• ${i}</li>`).join('');
+        container.innerHTML = `<div class="bg-white p-4 rounded-xl space-y-2 text-xs border">
+          <p class="font-bold text-emerald-800">المثائل (Generics):</p><ul>${gen}</ul>
+          <p class="font-bold text-teal-800">البدائل (Substitutes):</p><ul>${sub}</ul>
+        </div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="bg-red-50 p-3 rounded-xl text-red-600 text-xs">❌ خطأ: ${e.message}</div>`;
+      }
     }
 
     async function askGeminiDerma() {
@@ -344,10 +255,41 @@
       const container = document.getElementById('aiResultsDerma');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-sky-700 font-bold text-xs">⏳ جارِ تحليل الحالة...</div>`;
+      container.innerHTML = `<div class="bg-white p-4 rounded-xl text-center text-xs">⏳ جاري التحليل...</div>`;
       try {
-        const prompt = `أنت طبيب جلدي. قم بتحليل: "${query}". أرجع JSON: {"diagnosisAndCause": "السبب", "egyptianProducts": [{"name": "اسم المنتج", "category": "النوع", "note": "ملاحظة"}], "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-        let productsHtml = resJson.egyptianProducts.map(p => `<div class="p-2 bg-sky-50 rounded-lg border border-sky-200"><span class="font-bold text-xs">${p.name}</span> (${p.category}) - ${p.note}</div>`).join('');
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs"><p>🔬 <strong>السبب والتشخيص:</strong> ${resJson.diagnosisAndCause}</p><div class="space-y-1"><p class="f
+        const prompt = `أنت طبيب جلدية. أرجع JSON فقط للحالة "${query}": {"diagnosisAndCause": "السبب", "egyptianProducts": [{"name": "اسم المنتج", "category": "النوع", "note": "ملاحظة"}]}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
+
+        let prod = res.egyptianProducts.map(p => `<div>• <strong>${p.name}</strong> (${p.category}) - ${p.note}</div>`).join('');
+        container.innerHTML = `<div class="bg-white p-4 rounded-xl space-y-2 text-xs border">
+          <p><strong>السبب والتشخيص:</strong> ${res.diagnosisAndCause}</p>
+          <p><strong>المنتجات:</strong></p>${prod}
+        </div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="bg-red-50 p-3 rounded-xl text-red-600 text-xs">❌ خطأ: ${e.message}</div>`;
+      }
+    }
+
+    async function askGeminiAlgorithm() {
+      const query = document.getElementById('algoSearchInput').value.trim();
+      const container = document.getElementById('aiResultsAlgo');
+      if(!query) return;
+
+      container.innerHTML = `<div class="bg-white p-4 rounded-xl text-center text-xs">⏳ جاري رسم الخارطة...</div>`;
+      try {
+        const prompt = `أنت طبيب استشاري. أرجع JSON لخوارزمية علاج "${query}": {"conditionTitle": "الحالة", "branches": [{"decisionCriteria": "المعيار", "actionStep": "الإجراء"}]}`;
+        const res = await fetchGemini(prompt);
+        if(!res) return;
+
+        let b = res.branches.map(x => `<div>📌 <strong>${x.decisionCriteria}:</strong> ${x.actionStep}</div>`).join('');
+        container.innerHTML = `<div class="bg-white p-4 rounded-xl space-y-2 text-xs border">
+          <h3 class="font-bold text-amber-900">${res.conditionTitle}</h3>${b}
+        </div>`;
+      } catch(e) {
+        container.innerHTML = `<div class="bg-red-50 p-3 rounded-xl text-red-600 text-xs">❌ خطأ: ${e.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>
