@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الطبية والصيدلانية - د/ السعيد مسعد v3.8</title>
+  <title>لوحة التحكم الطبية - د/ السعيد مسعد v4.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -25,6 +25,12 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .btn-primary {
+      transition: all 0.2s ease;
+    }
+    .btn-primary:active {
+      transform: scale(0.95);
+    }
   </style>
 </head>
 <body class="pb-12 min-h-screen flex flex-col justify-between">
@@ -44,7 +50,7 @@
             <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span></p>
           </div>
         </div>
-        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">v3.8 🚀</span>
+        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">v4.0 🚀</span>
       </div>
     </header>
 
@@ -55,7 +61,7 @@
         <span class="font-bold text-amber-900">⚠️ إعدادات الربط بـ Gemini:</span>
         <div class="flex gap-2 flex-wrap">
           <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." class="flex-1 p-2.5 border border-amber-300 rounded-xl w-full text-xs bg-white focus:outline-none focus:ring-2 focus:ring-teal-600 min-w-[200px]" />
-          <button id="saveKeyBtn" onclick="saveApiKey()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-amber-800 transition text-xs">حفظ المفتاح</button>
+          <button onclick="saveApiKey()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-amber-800 transition text-xs">حفظ المفتاح</button>
           <button onclick="testApiConnection()" class="bg-teal-600 text-white px-4 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-teal-700 transition text-xs">🧪 اختبار الاتصال</button>
         </div>
         <div id="testResult" class="text-xs font-semibold mt-1"></div>
@@ -112,7 +118,7 @@
           <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي</h2>
           <div class="flex gap-2 flex-wrap">
             <input type="text" id="drugSearchInput" placeholder="مثال: Augmentin 1g..." class="flex-1 p-2.5 rounded-xl border border-teal-200 focus:outline-none text-xs min-w-[200px]" />
-            <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-teal-800 transition">بحث 🔍</button>
+            <button onclick="askGeminiDrug()" class="btn-primary bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-teal-800 transition">بحث 🔍</button>
           </div>
         </div>
         <div id="aiResultsDrug" class="space-y-4"></div>
@@ -123,7 +129,7 @@
           <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم البدائل</h2>
           <div class="flex gap-2 flex-wrap">
             <input type="text" id="altSearchInput" placeholder="مثال: Congestal..." class="flex-1 p-2.5 rounded-xl border border-emerald-200 focus:outline-none text-xs min-w-[200px]" />
-            <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-800 transition">عرض 🔄</button>
+            <button onclick="askGeminiAlternatives()" class="btn-primary bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-emerald-800 transition">عرض 🔄</button>
           </div>
         </div>
         <div id="aiResultsAlt" class="space-y-4"></div>
@@ -134,7 +140,7 @@
           <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> البشرة والشعر</h2>
           <div class="flex gap-2 flex-wrap">
             <input type="text" id="dermaSearchInput" placeholder="مثال: حب الشباب..." class="flex-1 p-2.5 rounded-xl border border-sky-200 focus:outline-none text-xs min-w-[200px]" />
-            <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-sky-800 transition">تحليل 💡</button>
+            <button onclick="askGeminiDerma()" class="btn-primary bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-sky-800 transition">تحليل 💡</button>
           </div>
         </div>
         <div id="aiResultsDerma" class="space-y-4"></div>
@@ -145,7 +151,7 @@
           <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> الخوارزميات</h2>
           <div class="flex gap-2 flex-wrap">
             <input type="text" id="algoSearchInput" placeholder="مثال: Asthma management..." class="flex-1 p-2.5 rounded-xl border border-amber-200 focus:outline-none text-xs min-w-[200px]" />
-            <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-amber-800 transition">رسم 🗺️</button>
+            <button onclick="askGeminiAlgorithm()" class="btn-primary bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-xs hover:bg-amber-800 transition">رسم 🗺️</button>
           </div>
         </div>
         <div id="aiResultsAlgo" class="space-y-4"></div>
@@ -155,7 +161,11 @@
   </div>
 
   <script>
-    // ===================== التهيئة عند تحميل الصفحة =====================
+    // ============================================================
+    //  كل الدوال معرفة كـ (function) عادية عشان تتنادى من الـ HTML
+    // ============================================================
+
+    // ---------- التهيئة ----------
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey && savedKey.length > 10) {
@@ -164,7 +174,7 @@
       }
     };
 
-    // ===================== إدارة المفتاح =====================
+    // ---------- إدارة المفتاح ----------
     function saveApiKey() {
       const key = document.getElementById('apiKeyInput').value.trim();
       if(key.length > 10) {
@@ -178,13 +188,15 @@
     }
 
     function getApiKey() {
-      return localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
+      const key = localStorage.getItem('gemini_api_key');
+      if(key && key.length > 10) return key;
+      return document.getElementById('apiKeyInput').value.trim();
     }
 
-    // ===================== اختبار الاتصال =====================
+    // ---------- اختبار الاتصال ----------
     async function testApiConnection() {
       const apiKey = getApiKey();
-      if(!apiKey) {
+      if(!apiKey || apiKey.length < 10) {
         document.getElementById('testResult').innerHTML = '⚠️ يرجى إدخال المفتاح أولاً';
         document.getElementById('testResult').className = 'text-xs font-semibold mt-1 text-amber-700';
         return;
@@ -216,7 +228,7 @@
       }
     }
 
-    // ===================== التنقل بين الصفحات =====================
+    // ---------- التنقل بين الصفحات ----------
     function openPage(pageId) {
       document.getElementById('pageDashboard').classList.add('hidden-dash');
       document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -230,15 +242,14 @@
       document.getElementById('backBtn').classList.add('hidden');
     }
 
-    // ===================== الدالة الأساسية للاتصال بـ Gemini =====================
+    // ---------- الدالة الأساسية للاتصال بـ Gemini ----------
     async function fetchGemini(promptText) {
       const apiKey = getApiKey();
-      if(!apiKey) {
+      if(!apiKey || apiKey.length < 10) {
         alert("⚠️ يرجى إدخال Gemini API Key أولاً.");
         return null;
       }
 
-      // استخدام النموذج المستقر gemini-1.5-flash
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
       try {
@@ -256,23 +267,19 @@
 
         const data = await response.json();
         
-        // التحقق من وجود خطأ
         if (data.error) {
           throw new Error(data.error.message);
         }
 
-        // التحقق من وجود محتوى
         if (!data.candidates || data.candidates.length === 0) {
           throw new Error('لم يتم استلام أي رد من النموذج');
         }
 
         const rawText = data.candidates[0].content.parts[0].text;
         
-        // محاولة تحويل النص إلى JSON
         try {
           return JSON.parse(rawText);
         } catch (jsonError) {
-          // لو مش JSON، حاول تستخرج JSON من النص
           const jsonMatch = rawText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
             try {
@@ -290,7 +297,7 @@
       }
     }
 
-    // ===================== وظيفة مساعدة لعرض النتائج =====================
+    // ---------- وظائف عرض النتائج ----------
     function showLoading(containerId) {
       document.getElementById(containerId).innerHTML = `
         <div class="bg-white p-6 rounded-xl text-center text-xs">
@@ -309,10 +316,17 @@
       `;
     }
 
-    // ===================== 1. المساعد الدوائي =====================
+    // ============================================================
+    //  الدوال الأربعة الرئيسية - معرفة كـ function عادية
+    // ============================================================
+
+    // 1. المساعد الدوائي
     async function askGeminiDrug() {
       const query = document.getElementById('drugSearchInput').value.trim();
-      if(!query) return alert('⚠️ يرجى إدخال اسم الدواء');
+      if(!query) {
+        alert('⚠️ يرجى إدخال اسم الدواء');
+        return;
+      }
 
       showLoading('aiResultsDrug');
       try {
@@ -334,10 +348,13 @@
       }
     }
 
-    // ===================== 2. المثائل والبدائل =====================
+    // 2. المثائل والبدائل
     async function askGeminiAlternatives() {
       const query = document.getElementById('altSearchInput').value.trim();
-      if(!query) return alert('⚠️ يرجى إدخال اسم الدواء');
+      if(!query) {
+        alert('⚠️ يرجى إدخال اسم الدواء');
+        return;
+      }
 
       showLoading('aiResultsAlt');
       try {
@@ -359,10 +376,13 @@
       }
     }
 
-    // ===================== 3. البشرة والشعر =====================
+    // 3. البشرة والشعر
     async function askGeminiDerma() {
       const query = document.getElementById('dermaSearchInput').value.trim();
-      if(!query) return alert('⚠️ يرجى إدخال المشكلة');
+      if(!query) {
+        alert('⚠️ يرجى إدخال المشكلة');
+        return;
+      }
 
       showLoading('aiResultsDerma');
       try {
@@ -379,13 +399,4 @@
             <h3 class="font-bold text-base text-sky-800">✨ تحليل حالة: "${query}"</h3>
             <div><strong class="text-sky-700">🔬 التشخيص والسبب:</strong> ${res.diagnosisAndCause || 'غير متوفر'}</div>
             <div><strong class="text-sky-700">🧴 المنتجات المتاحة:</strong> <div class="mt-1">${prod}</div></div>
-          </div>
-        `;
-      } catch(e) {
-        showError('aiResultsDerma', e.message);
-      }
-    }
-
-    // ===================== 4. الخوارزميات الطبية =====================
-    async function askGeminiAlgorithm() {
-      const query =
+       
