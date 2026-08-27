@@ -3,322 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الطبية والصيدلانية</title>
+  <title>لوحة التحكم الطبية والصيدلانية الذكية</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #0f766e;
-      --primary-dark: #115e59;
-      --primary-light: #ccfbf1;
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --radius-lg: 16px;
-      --radius-md: 12px;
-      --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
-      --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.08);
-    }
-
-    * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 40px; }
-
-    /* Header */
-    header { 
-      background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); 
-      color: white; 
-      padding: 16px 20px; 
-      position: sticky; 
-      top: 0; 
-      z-index: 100; 
-      box-shadow: 0 4px 20px rgba(15, 118, 110, 0.25);
-    }
-    .header-content { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-    header p { font-size: 11px; color: var(--primary-light); font-weight: 600; margin-top: 2px; }
-
-    .container { max-width: 800px; margin: 20px auto; padding: 0 16px; }
-
-    /* Cards */
-    .card { 
-      background: var(--card-bg); 
-      border-radius: var(--radius-lg); 
-      padding: 20px; 
-      margin-bottom: 16px; 
-      border: 1px solid var(--border-color); 
-      box-shadow: var(--shadow-sm);
-    }
-
-    /* Grid Setup */
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
-    @media (min-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-
-    /* Modern Dashboard Action Cards */
-    .btn-card { 
-      background: #ffffff; 
-      border: 1px solid var(--border-color); 
-      border-radius: var(--radius-md); 
-      padding: 18px 12px; 
-      text-align: center; 
-      cursor: pointer; 
-      transition: all 0.23s ease; 
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-    .btn-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
-    .btn-card:active { transform: scale(0.96); }
-
-    /* Dynamic Card Accent Colors */
-    .btn-card.drug { border-top: 4px solid #0f766e; }
-    .btn-card.alt { border-top: 4px solid #047857; }
-    .btn-card.derma { border-top: 4px solid #0369a1; }
-    .btn-card.algo { border-top: 4px solid #b45309; }
-
-    .btn-card .icon { font-size: 28px; margin-bottom: 8px; display: block; }
-    .btn-card .title { font-size: 13px; font-weight: 800; color: var(--text-main); display: block; }
-
-    /* Form Controls & Inputs */
-    .input-group { display: flex; gap: 10px; margin-top: 12px; }
-    input[type="text"], input[type="password"], input[type="number"], select { 
-      flex: 1; 
-      padding: 12px 14px; 
-      border: 1.5px solid #cbd5e1; 
-      border-radius: var(--radius-md); 
-      font-size: 13px; 
-      outline: none; 
-      background: #ffffff;
-      transition: all 0.2s;
-    }
-    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15); }
-
-    button.action-btn { 
-      background: var(--primary); 
-      color: white; 
-      border: none; 
-      padding: 12px 20px; 
-      border-radius: var(--radius-md); 
-      font-size: 13px; 
-      font-weight: 700; 
-      cursor: pointer; 
-      white-space: nowrap; 
-      transition: all 0.2s;
-      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
-    }
-    button.action-btn:hover { background: var(--primary-dark); }
-    button.action-btn:active { transform: scale(0.96); }
-
-    .back-btn { 
-      background: #ffffff; 
-      color: var(--text-main); 
-      border: 1px solid var(--border-color); 
-      padding: 8px 16px; 
-      border-radius: 20px; 
-      font-size: 12px; 
-      font-weight: 700;
-      cursor: pointer; 
-      margin-bottom: 14px; 
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: var(--shadow-sm);
-      transition: all 0.2s;
-    }
-    .back-btn:active { transform: scale(0.95); background: #f1f5f9; }
-
-    /* Elegant Result Containers */
-    .result-box { 
-      background: #ffffff; 
-      border-radius: var(--radius-lg); 
-      padding: 18px; 
-      border: 1px solid var(--border-color); 
-      margin-top: 14px; 
-      font-size: 13px; 
-      line-height: 1.7; 
-      box-shadow: var(--shadow-sm);
-    }
-    .result-box h3 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-
-    .badge { 
-      background: var(--primary-light); 
-      color: var(--primary-dark); 
-      font-size: 10px; 
-      padding: 3px 10px; 
-      border-radius: 20px; 
-      font-weight: 800; 
-    }
-
-    .loading { 
-      text-align: center; 
-      color: var(--primary); 
-      font-weight: 700; 
-      padding: 20px; 
-      font-size: 13px; 
-      background: #ffffff;
-      border-radius: var(--radius-lg);
-      border: 1px dashed var(--border-color);
-      margin-top: 14px;
-    }
-
-    .hidden { display: none !important; }
+    body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; color: #0f172a; }
   </style>
 </head>
-<body>
+<body class="pb-12">
 
-  <header>
-    <div class="header-content">
-      <div>
-        <h1>🩺 لوحة التحكم الطبية والصيدلانية</h1>
-        <p>منصة الدعم السريري والتجميلي السريعة</p>
+  <!-- Header -->
+  <header class="bg-teal-900 text-white p-4 shadow-xl sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center gap-3">
+        <button id="backBtn" onclick="showDashboard()" class="hidden bg-teal-800 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1">
+          <span>➡️</span> العودة للرئيسية
+        </button>
+        <div>
+          <h1 id="headerTitle" class="text-lg font-black flex items-center gap-2">
+            <span>🩺</span> لوحة التحكم الطبية والصيدلانية
+          </h1>
+          <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI</p>
+        </div>
       </div>
-      <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff;">v2.5 Pro</span>
+      <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v2.5 🚀</span>
     </div>
   </header>
 
-  <div class="container">
+  <div class="max-w-4xl mx-auto p-4 space-y-4">
 
     <!-- API Key Section -->
-    <div id="apiKeySection" class="card" style="background-color: #fffbeb; border-color: #fef08a;">
-      <span style="font-size: 12px; font-weight: bold; color: #854d0e;">⚠️ إعداد مفتاح Gemini API (مطلوب مرة واحدة):</span>
-      <div class="input-group">
-        <input type="password" id="apiKeyInput" placeholder="الصق المفتاح هنا..." />
-        <button class="action-btn" style="background-color: #a16207;" onclick="saveApiKey()">حفظ المفتاح</button>
+    <div id="apiKeySection" class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs flex flex-col gap-2 shadow-sm">
+      <span class="font-bold text-amber-900">⚠️ إعدادات الربط بـ Gemini (مطلوبة مرة واحدة):</span>
+      <div class="flex gap-2">
+        <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." class="p-2.5 border border-amber-300 rounded-xl w-full text-xs bg-white focus:outline-none focus:ring-2 focus:ring-teal-600" />
+        <button onclick="saveApiKey()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-amber-800 transition">حفظ المفتاح</button>
       </div>
     </div>
 
     <!-- MAIN DASHBOARD PAGE -->
-    <div id="pageDashboard">
-      <div class="card">
-        <h2 style="font-size: 14px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">الأقسام الرئيسية</h2>
-        <div class="grid">
-          <div class="btn-card drug" onclick="openPage('pageDrug')">
-            <span class="icon">💊</span>
-            <span class="title">المساعد الدوائي</span>
-          </div>
-          <div class="btn-card alt" onclick="openPage('pageAlt')">
-            <span class="icon">🔄</span>
-            <span class="title">المثائل والبدائل</span>
-          </div>
-          <div class="btn-card derma" onclick="openPage('pageDerma')">
-            <span class="icon">✨</span>
-            <span class="title">الشعر والبشرة</span>
-          </div>
-          <div class="btn-card algo" onclick="openPage('pageAlgo')">
-            <span class="icon">🌿</span>
-            <span class="title">الخوارزميات</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE 1: DRUG ASSISTANT + PEDIATRIC CALCULATOR -->
-    <div id="pageDrug" class="page-content hidden">
-      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
-      
-      <!-- البحث العام عن الدواء -->
-      <div class="card">
-        <h2 style="font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 4px;">💊 المساعد الدوائي العام</h2>
-        <div class="input-group">
-          <input type="text" id="drugSearchInput" placeholder="اكتب اسم الدواء أو السؤال الطبي..." />
-          <button class="action-btn" onclick="askGeminiDrug()">بحث</button>
-        </div>
-      </div>
-
-      <!-- حاسبة جرعات الأطفال -->
-      <div class="card" style="border-right: 4px solid #0f766e; background: #f0fdf4;">
-        <h2 style="font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 4px;">👶 حاسبة جرعات الأطفال (Pediatric Dose Calculator)</h2>
-        <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">أدخل الوزن بالـ kg، أو أدخل العمر وسيتم تقدير الوزن تقريبياً تلقائياً.</p>
+    <div id="pageDashboard" class="space-y-4">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <h2 class="text-sm font-extrabold text-slate-800">التنقل في لوحة التحكم الرئيسية</h2>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
-          <div>
-            <label style="font-size: 11px; font-weight: bold; color: #334155;">العمر:</label>
-            <div style="display: flex; gap: 4px;">
-              <input type="number" id="pedAge" placeholder="الرقم" oninput="calculatePediatricWeight()" style="padding: 8px; font-size: 12px;" />
-              <select id="pedAgeUnit" onchange="calculatePediatricWeight()" style="border-radius: var(--radius-md); border: 1.5px solid #cbd5e1; font-size: 11px; padding: 4px;">
-                <option value="years">سنة</option>
-                <option value="months">شهر</option>
-              </select>
+        <!-- Compact Cards Grid: 2 or 3 per row -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          
+          <!-- Card 1: Drug Assistant -->
+          <div onclick="openPage('pageDrug')" class="group cursor-pointer p-3 bg-slate-50 border border-teal-500/30 hover:border-teal-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
+            <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-teal-600 transition text-xs">↗</span></div>
+            <div class="text-2xl my-auto group-hover:scale-110 transition-transform">💊</div>
+            <div>
+              <h3 class="font-bold text-xs text-slate-800 group-hover:text-teal-900">المساعد الدوائي</h3>
+              <p class="text-[10px] text-slate-500 font-semibold">(Drug Assistant)</p>
             </div>
           </div>
 
-          <div>
-            <label style="font-size: 11px; font-weight: bold; color: #334155;">الوزن (Kg):</label>
-            <input type="number" id="pedWeight" placeholder="الوزن بالـ كجم" style="padding: 8px; font-size: 12px;" />
+          <!-- Card 2: Alternatives & Generics -->
+          <div onclick="openPage('pageAlt')" class="group cursor-pointer p-3 bg-slate-50 border border-emerald-500/30 hover:border-emerald-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
+            <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-emerald-600 transition text-xs">↗</span></div>
+            <div class="text-2xl my-auto group-hover:scale-110 transition-transform">🔄</div>
+            <div>
+              <h3 class="font-bold text-xs text-slate-800 group-hover:text-emerald-900">المثائل والبدائل</h3>
+              <p class="text-[10px] text-slate-500 font-semibold">(Generics & Substitutes)</p>
+            </div>
           </div>
 
-          <div>
-            <label style="font-size: 11px; font-weight: bold; color: #334155;">الجرعة المطلوبة (mg/kg):</label>
-            <input type="number" id="pedDoseMgKg" placeholder="مثال: 15" style="padding: 8px; font-size: 12px;" />
+          <!-- Card 3: Hair & Skin Care -->
+          <div onclick="openPage('pageDerma')" class="group cursor-pointer p-3 bg-slate-50 border border-sky-500/30 hover:border-sky-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
+            <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-sky-600 transition text-xs">↗</span></div>
+            <div class="text-2xl my-auto group-hover:scale-110 transition-transform">✨</div>
+            <div>
+              <h3 class="font-bold text-xs text-slate-800 group-hover:text-sky-900">الشعر والبشرة</h3>
+              <p class="text-[10px] text-slate-500 font-semibold">(Hair & Skin Care)</p>
+            </div>
           </div>
 
+          <!-- Card 4: Medical Algorithms -->
+          <div onclick="openPage('pageAlgo')" class="group cursor-pointer p-3 bg-slate-50 border border-amber-500/30 hover:border-amber-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
+            <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-amber-600 transition text-xs">↗</span></div>
+            <div class="text-2xl my-auto group-hover:scale-110 transition-transform">🌿</div>
+            <div>
+              <h3 class="font-bold text-xs text-slate-800 group-hover:text-amber-900">الخوارزميات الطبية</h3>
+              <p class="text-[10px] text-slate-500 font-semibold">(Medical Algorithms)</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Quick Search Section -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2">
+        <h3 class="text-xs font-bold text-slate-700">بحث سريع في الخوارزميات والبروتوكولات:</h3>
+        <div class="flex gap-2">
+          <input type="text" id="quickSearchInput" onkeyup="if(event.key === 'Enter') handleQuickSearch()" placeholder="مثال: Hypertension, Diabetes..." class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+          <button onclick="handleQuickSearch()" class="bg-teal-800 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-teal-900 transition whitespace-nowrap text-xs flex items-center gap-1">
+            <span>🔍</span> بحث
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 1: DRUG ASSISTANT -->
+    <div id="pageDrug" class="page-content hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي والسؤال عن المنتج</h2>
+        <div class="space-y-2">
           <div>
-            <label style="font-size: 11px; font-weight: bold; color: #334155;">تركيز الدواء (mg / ml):</label>
-            <div style="display: flex; gap: 4px; align-items: center;">
-              <input type="number" id="pedActiveMg" placeholder="mg" style="padding: 8px; font-size: 12px;" />
-              <span style="font-size: 12px;">/</span>
-              <input type="number" id="pedVolMl" placeholder="ml" value="5" style="padding: 8px; font-size: 12px;" />
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">اسم الدواء أو السؤال عن المنتج الدوائي:</label>
+            <div class="flex gap-2">
+              <input type="text" id="drugSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDrug()" placeholder="مثال: Augmentin 1gm، هل الآيبوبروفين آمن لمريض الضغط؟..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+              <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-teal-800 transition whitespace-nowrap text-xs">استفسار / بحث 🔍</button>
             </div>
           </div>
         </div>
-
-        <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
-          <button class="action-btn" style="flex: 1;" onclick="calculatePediatricDose()">احسب الجرعة 🧮</button>
-          <button class="action-btn" style="background-color: #0369a1;" onclick="askGeminiPedDose()">تأكيد مع الذكاء الاصطناعي 🤖</button>
-        </div>
-
-        <div id="pedCalcResult" style="margin-top: 10px;"></div>
       </div>
-
-      <div id="aiResultsDrug"></div>
+      <div id="aiResultsDrug" class="space-y-4"></div>
     </div>
 
-    <!-- PAGE 2: ALTERNATIVES -->
-    <div id="pageAlt" class="page-content hidden">
-      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
-      <div class="card">
-        <h2 style="font-size: 14px; font-weight: 800; color: #047857; margin-bottom: 4px;">🔄 المثائل والبدائل</h2>
-        <div class="input-group">
-          <input type="text" id="altSearchInput" placeholder="اسم الدواء..." />
-          <button class="action-btn" style="background-color: #047857;" onclick="askGeminiAlternatives()">عرض البدائل</button>
+    <!-- PAGE 2: ALTERNATIVES & GENERICS (NEW) -->
+    <div id="pageAlt" class="page-content hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">اسم الدواء المطلوب بحث بدائله:</label>
+          <div class="flex gap-2">
+            <input type="text" id="altSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlternatives()" placeholder="مثال: Panadol, Congestal, Clexane..." class="w-full p-2.5 rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-xs" />
+            <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-800 transition whitespace-nowrap text-xs">عرض المثائل والبدائل 🔄</button>
+          </div>
         </div>
       </div>
-      <div id="aiResultsAlt"></div>
+      <div id="aiResultsAlt" class="space-y-4"></div>
     </div>
 
-    <!-- PAGE 3: DERMA -->
-    <div id="pageDerma" class="page-content hidden">
-      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
-      <div class="card">
-        <h2 style="font-size: 14px; font-weight: 800; color: #0369a1; margin-bottom: 4px;">✨ الشعر والبشرة</h2>
-        <div class="input-group">
-          <input type="text" id="dermaSearchInput" placeholder="وصف المشكلة الجلدية..." />
-          <button class="action-btn" style="background-color: #0369a1;" onclick="askGeminiDerma()">تحليل</button>
+    <!-- PAGE 3: HAIR & SKIN -->
+    <div id="pageDerma" class="page-content hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> قسم العناية بالشعر والبشرة</h2>
+        <label class="block text-[11px] font-bold text-slate-700 mb-1">وصف مشكلة البشرة أو الشعر:</label>
+        <div class="flex gap-2">
+          <input type="text" id="dermaSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDerma()" placeholder="مثال: تساقط شعر وراثي، حب شباب هرموني..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+          <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-sky-800 transition whitespace-nowrap text-xs">عرض الحل 💡</button>
         </div>
       </div>
-      <div id="aiResultsDerma"></div>
+      <div id="aiResultsDerma" class="space-y-4"></div>
     </div>
 
-    <!-- PAGE 4: ALGORITHMS -->
-    <div id="pageAlgo" class="page-content hidden">
-      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
-      <div class="card">
-        <h2 style="font-size: 14px; font-weight: 800; color: #b45309; margin-bottom: 4px;">🌿 الخوارزميات الطبية</h2>
-        <div class="input-group">
-          <input type="text" id="algoSearchInput" placeholder="اسم الحالة الطبية..." />
-          <button class="action-btn" style="background-color: #b45309;" onclick="askGeminiAlgorithm()">رسم الخريطة</button>
+    <!-- PAGE 4: MEDICAL ALGORITHMS -->
+    <div id="pageAlgo" class="page-content hidden space-y-4">
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+        <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> قسم الخوارزميات والبروتوكولات الطبية</h2>
+        <label class="block text-[11px] font-bold text-slate-700 mb-1">المشكلة أو الحالة الطبية (Clinical Presentation):</label>
+        <div class="flex gap-2">
+          <input type="text" id="algoSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlgorithm()" placeholder="مثال: Hypertension, Acute Asthma Exacerbation..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
+          <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-800 transition whitespace-nowrap text-xs">رسم الخريطة 🗺️</button>
         </div>
       </div>
-      <div id="aiResultsAlgo"></div>
+      <div id="aiResultsAlgo" class="space-y-4"></div>
     </div>
 
   </div>
 
   <script>
+    let currentDrugForPediatric = "";
+
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey) {
@@ -333,27 +181,37 @@
         localStorage.setItem('gemini_api_key', key);
         document.getElementById('apiKeySection').style.display = 'none';
         alert('تم حفظ المفتاح بنجاح! 🚀');
-      } else { 
-        alert('من فضلك أدخل مفتاح صحيح.'); 
-      }
+      } else { alert('من فضلك أدخل مفتاح صحيح.'); }
     }
 
     function openPage(pageId) {
       document.getElementById('pageDashboard').classList.add('hidden');
       document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+      
       document.getElementById(pageId).classList.remove('hidden');
+      document.getElementById('backBtn').classList.remove('hidden');
     }
 
     function showDashboard() {
       document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
       document.getElementById('pageDashboard').classList.remove('hidden');
+      document.getElementById('backBtn').classList.add('hidden');
+    }
+
+    function handleQuickSearch() {
+      const val = document.getElementById('quickSearchInput').value.trim();
+      if(val) {
+        openPage('pageAlgo');
+        document.getElementById('algoSearchInput').value = val;
+        askGeminiAlgorithm();
+      }
     }
 
     function getApiKey() {
       const key = localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
       if(!key) {
-        alert('⚠️ برجاء إدخال وحفظ Gemini API Key أولاً.');
-        document.getElementById('apiKeySection').style.display = 'block';
+        alert('برجاء إدخال وحفظ Gemini API Key أولاً.');
+        document.getElementById('apiKeySection').style.display = 'flex';
         return null;
       }
       return key;
@@ -363,136 +221,116 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      // استخدام موديل محدد ومستقر gemini-2.5-flash
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText + "\nIMPORTANT: Return ONLY valid JSON." }] }]
+          contents: [{ parts: [{ text: promptText }] }]
         })
       });
 
       const data = await response.json();
       if (data.error) throw new Error(data.error.message || 'خطأ في API');
-      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة.');
+      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة من السيرفر.');
 
-      let rawText = data.candidates[0].content.parts[0].text.trim();
-      
-      // تنظيف النص من أوساط الكود JSON إن وجدت
-      rawText = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
-      
-      const jsonStart = rawText.indexOf('{');
-      const jsonEnd = rawText.lastIndexOf('}');
-      if (jsonStart !== -1 && jsonEnd !== -1) {
-        rawText = rawText.substring(jsonStart, jsonEnd + 1);
-      }
-
-      return JSON.parse(rawText);
+      let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
     }
 
-    /* --- 1. حاسبة جرعات الأطفال --- */
+    async function askGeminiDrug() {
+      const query = document.getElementById('drugSearchInput').value.trim();
+      const container = document.getElementById('aiResultsDrug');
+      if(!query) return;
 
-    // حساب الوزن التقريبي بناءً على العمر
-    function calculatePediatricWeight() {
-      const ageVal = parseFloat(document.getElementById('pedAge').value);
-      const unit = document.getElementById('pedAgeUnit').value;
-      const weightInput = document.getElementById('pedWeight');
-
-      if (isNaN(ageVal) || ageVal <= 0) return;
-
-      let estimatedWeight = 0;
-
-      if (unit === 'months') {
-        // للأطفال أقل من سنة: (العمر بالأشهر + 9) / 2
-        estimatedWeight = (ageVal + 9) / 2;
-      } else {
-        // للأطفال من سنة وما فوق
-        if (ageVal <= 5) {
-          estimatedWeight = (ageVal * 2) + 8; // معادلة APLS للطفل حتى 5 سنوات
-        } else {
-          estimatedWeight = (ageVal * 3) + 7; // معادلة APLS المحدثة للأطفال فوق 5 سنوات
-        }
-      }
-
-      weightInput.value = estimatedWeight.toFixed(1);
-    }
-
-    // حساب الجرعة بالـ mg والـ ml
-    function calculatePediatricDose() {
-      const weight = parseFloat(document.getElementById('pedWeight').value);
-      const dosePerKg = parseFloat(document.getElementById('pedDoseMgKg').value);
-      const activeMg = parseFloat(document.getElementById('pedActiveMg').value);
-      const volMl = parseFloat(document.getElementById('pedVolMl').value) || 5;
-      const resultDiv = document.getElementById('pedCalcResult');
-
-      if (isNaN(weight) || weight <= 0) {
-        alert("برجاء إدخال الوزن أو أدخل العمر لحسابه تقريبياً.");
-        return;
-      }
-
-      if (isNaN(dosePerKg) || dosePerKg <= 0) {
-        alert("برجاء إدخال الجرعة المطلوبة لكل كجم (mg/kg).");
-        return;
-      }
-
-      // إجمالي الجرعة بالـ mg
-      const totalMg = weight * dosePerKg;
-
-      let htmlResult = `
-        <div class="result-box" style="background: #ffffff; border-right: 4px solid #0f766e;">
-          <p><strong>⚖️ الوزن المعتمد:</strong> ${weight} كجم</p>
-          <p><strong>🎯 إجمالي الجرعة للمرة الواحدة/اليوم:</strong> <span style="color:#0f766e; font-weight:800;">${totalMg.toFixed(1)} mg</span></p>
-      `;
-
-      // حساب الحجم بالـ ml إذا أُدخل التركيز
-      if (!isNaN(activeMg) && activeMg > 0) {
-        const singleDoseMl = (totalMg * volMl) / activeMg;
-        htmlResult += `
-          <p style="margin-top:6px; background:#e6fffa; padding:8px; border-radius:8px; color:#065f46;">
-            <strong>🧪 الكمية المطلوبة بالشراب:</strong> <span style="font-size:16px; font-weight:800;">${singleDoseMl.toFixed(1)} مل (ml)</span> 
-            <br><small>(بناءً على تركيز ${activeMg}mg / ${volMl}ml)</small>
-          </p>
-        `;
-      }
-
-      htmlResult += `</div>`;
-      resultDiv.innerHTML = htmlResult;
-    }
-
-    // الاستعانة بـ Gemini للتحقق من جرعة طفل لدواء محدد
-    async function askGeminiPedDose() {
-      const drugName = document.getElementById('drugSearchInput').value.trim();
-      const weight = document.getElementById('pedWeight').value;
-      const age = document.getElementById('pedAge').value;
-      const ageUnit = document.getElementById('pedAgeUnit').value;
-
-      if (!drugName) {
-        alert("يرجى كتابة اسم الدواء في خانة 'المساعد الدوائي العام' بالأعلى أولاً.");
-        return;
-      }
-
-      const container = document.getElementById('pedCalcResult');
-      container.innerHTML = `<div class="loading">⏳ جارِ فحص الجرعة الموصى بها علمياً لهذا الدواء...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ تحليل السؤال/المنتج بـ Gemini 3.6...</div>`;
 
       try {
-        const prompt = `أنت صيدلي خبير. قم بحساب وتأكيد جرعة الدواء "${drugName}" لطفل عمره ${age || 'غير محدد'} ${ageUnit} ووزنه ${weight || 'غير محدد'} كجم. 
-        أرجع JSON فقط بالصيغة: 
+        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج/الاستفسار", "activeIngredients": ["المادة الفعالة 1"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "طريقة الاستخدام والجرعة الأساسية"}`;
+        const resJson = await fetchGemini(prompt);
+        currentDrugForPediatric = resJson.name;
+
+        let ingredientsHtml = resJson.activeIngredients.map(item => `<li class="flex items-center gap-1.5 text-xs text-gray-800 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span><span>${item}</span></li>`).join('');
+
+        container.innerHTML = `
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 space-y-3 text-xs leading-relaxed">
+            <div class="border-b border-gray-100 pb-2 flex justify-between items-start">
+              <h3 class="font-extrabold text-base text-teal-900">${resJson.name}</h3>
+              <span class="bg-teal-50 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Gemini 3.6</span>
+            </div>
+            <div class="bg-teal-50/60 p-2.5 rounded-xl border border-teal-100 space-y-1">
+              <p class="font-bold text-teal-900 text-[11px]">🧪 المكونات الأساسية:</p>
+              <ul class="space-y-1 pr-1">${ingredientsHtml}</ul>
+            </div>
+            <div class="space-y-2 text-gray-800">
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">🎯 الإجابة / دواعي الاستعمال:</p><p>${resJson.indications}</p></div>
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">💊 الجرعة والاستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
+            </div>
+
+            <!-- Child Dosage Calculator Section -->
+            <div class="bg-sky-50 p-3 rounded-xl border border-sky-200 space-y-2 mt-3">
+              <p class="font-bold text-sky-900 text-xs">👶 حاسبة جرعة الأطفال بالوزن (Pediatric Dose Calculator):</p>
+              <div class="flex gap-2">
+                <input type="number" id="pediaWeightInput" placeholder="أدخل وزن الطفل (كجم)..." class="w-full p-2 border border-sky-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-sky-600 bg-white" />
+                <button onclick="calculatePediatricDose()" class="bg-sky-700 text-white px-4 py-2 rounded-lg font-bold hover:bg-sky-800 transition whitespace-nowrap text-xs">حساب الجرعة 🧮</button>
+              </div>
+              <div id="pediatricResult" class="hidden mt-2 p-2.5 bg-white rounded-lg border border-sky-200 text-sky-950 font-bold text-xs"></div>
+            </div>
+
+          </div>`;
+      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
+    }
+
+    async function calculatePediatricDose() {
+      const weight = document.getElementById('pediaWeightInput').value.trim();
+      const resContainer = document.getElementById('pediatricResult');
+
+      if (!weight || weight <= 0) {
+        alert("برجاء إدخال وزن صحيح بالكيوجرام.");
+        return;
+      }
+
+      resContainer.classList.remove('hidden');
+      resContainer.innerHTML = `⏳ جارِ حساب الجرعة الدقيقة لوزن ${weight} كجم...`;
+
+      try {
+        const prompt = `أنت صيدلي خبير. احسب الجرعة الدقيقة للأطفال بالوزن للدواء التالي: "${currentDrugForPediatric}" لطفل وزنه: ${weight} كجم. 
+        أرجع JSON فقط بالصيغة: {"dose": "مقدار الجرعة بالـ ml أو mg وعدد المرات يومياً باختصار شديد"}`;
+        
+        const resJson = await fetchGemini(prompt);
+        resContainer.innerHTML = `✅ **الجرعة المقترحة لوزن (${weight} كجم):** ${resJson.dose}`;
+      } catch (err) {
+        resContainer.innerHTML = `❌ حدث خطأ أثناء حساب الجرعة.`;
+      }
+    }
+
+    async function askGeminiAlternatives() {
+      const query = document.getElementById('altSearchInput').value.trim();
+      const container = document.getElementById('aiResultsAlt');
+      if(!query) return;
+
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ استخراج المثائل والبدائل المتاحة بـ Gemini 3.6...</div>`;
+
+      try {
+        const prompt = `أنت صيدلي خبير بالسوق المصري. اخرج المثائل المتاحة (Generics: نفس المادة الفعالة) والبدائل المتاحة (Substitutes: بديل له نفس التأثير) للدواء التالي: "${query}".
+        يجب أن تكون الإجابة مختصرة ومرتبة كقوائم فقط وبدون أي مقدمات أو كلام إضافي إطلاقاً.
+        أرجع JSON بالشكل التالي فقط:
         {
-          "recommendedDose": "الجرعة بالـ mg لكل كجم", 
-          "maxDose": "الجرعة القصوى اليومية", 
-          "instructions": "تعليمات تقسيم الجرعات (مثلاً كل 8 ساعات)",
-          "notes": "تحذيرات أو ملاحظات صيدلانية مهمة"
+          "generics": ["مثيل 1", "مثيل 2"],
+          "substitutes": ["بديل 1", "بديل 2"]
         }`;
 
         const resJson = await fetchGemini(prompt);
-        if (!resJson) return;
+
+        let genHtml = resJson.generics.map(item => `<li class="p-1.5 bg-emerald-50 rounded-lg text-emerald-950 font-bold text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>${item}</li>`).join('');
+        let subHtml = resJson.substitutes.map(item => `<li class="p-1.5 bg-teal-50 rounded-lg text-teal-950 font-bold text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>${item}</li>`).join('');
 
         container.innerHTML = `
-          <div class="result-box" style="border-right: 4px solid #0369a1;">
-            <h3 style="font-size:14px; color:#0369a1; font-weight:800;">توصية Gemini للدواء: ${drugName} <span class="badge">AI Verification</span></h3>
-            <p style="margin-top:6px;"><strong>📌 الجرعة الموصى بها:</strong> ${resJson.recommendedDose}</p>
-            <p style="margin-top:4px;"><strong>⏰ طريقة التقسيم:</strong> ${resJson.instructions}</p>
-            <p style="margin-top:4px;"><strong>⚠️ الجرعة القصوى:</strong> ${resJson.maxDose}</p>
-            <p style="margin-top:6px; color:#991b1b; background:#fef2f2; padding:6px; border-radius:6px;"><strong>💡 ملاحظات:</stron
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-200 space-y-4">
+            <div>
+              <h3 class="font-extrabold text-xs text-emerald-900 mb-2 flex items-center gap-1">🧪 المثائل المتاحة (Generics - نفس المادة الفعالة):</h3>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${genHtml}</ul>
+            </div>
+            <div class="border-t border-slate-100 pt-3">
+             
