@@ -165,6 +165,23 @@
       margin-top: 14px;
     }
 
+    .price-category {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+
+    .product-item {
+      background: #ffffff;
+      border-right: 3px solid #0369a1;
+      padding: 6px 10px;
+      margin-top: 6px;
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -176,7 +193,7 @@
         <h1>🩺 لوحة التحكم الطبية والصيدلانية</h1>
         <p>منصة الدعم السريري والتجميلي السريعة</p>
       </div>
-      <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff;">v2.0 Pro</span>
+      <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff;">v2.1 Pro</span>
     </div>
   </header>
 
@@ -384,21 +401,75 @@
       if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDerma');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وصياغة الروتين...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وترشيح المنتجات والروتين...</div>`;
 
       try {
-        const prompt = `أنت طبيب جلدي. قم بتحليل المشكلة: "${query}". أرجع JSON بالتراكيب: {"diagnosisAndCause": "التشخيص", "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
+        const prompt = `أنت طبيب جلدي وخبير بالمنتجات الصيدلانية في السوق. قم بتحليل مشكلة: "${query}". 
+أرجع JSON فقط بالصيغة التالية تماماً دون أي نص خارجي:
+{
+  "diagnosisAndCause": "التشخيص العلمي المباشر للمشكلة",
+  "products": {
+    "highRange": [
+      {"name": "اسم المنتج 1 (High-end)", "ingredients": "المكونات الفعالة الرئيسية"},
+      {"name": "اسم المنتج 2 (High-end)", "ingredients": "المكونات الفعالة الرئيسية"},
+      {"name": "اسم المنتج 3 (High-end)", "ingredients": "المكونات الفعالة الرئيسية"}
+    ],
+    "midRange": [
+      {"name": "اسم المنتج 1 (Medium)", "ingredients": "المكونات الفعالة الرئيسية"},
+      {"name": "اسم المنتج 2 (Medium)", "ingredients": "المكونات الفعالة الرئيسية"},
+      {"name": "اسم المنتج 3 (Medium)", "ingredients": "المكونات الفعالة الرئيسية"}
+    ],
+    "economicRange": [
+      {"name": "اسم المنتج 1 (Economic)", "ingredients": "المكونات الفعالة الرئيسية"},
+      {"name": "اسم المنتج 2 (Economic)", "ingredients": "المكونات الفعالة الرئيسية"},
+      {"name": "اسم المنتج 3 (Economic)", "ingredients": "المكونات الفعالة الرئيسية"}
+    ]
+  },
+  "routine": {
+    "morning": ["خطوة 1 بالترتيب", "خطوة 2"],
+    "evening": ["خطوة 1 بالترتيب", "خطوة 2"]
+  }
+}`;
+
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
+        const renderProducts = (list) => {
+          return list.map(p => `
+            <div class="product-item">
+              <strong style="color:#0f172a;">• ${p.name}</strong> 
+              <span style="color:#64748b;">(${p.ingredients})</span>
+            </div>
+          `).join('');
+        };
+
         container.innerHTML = `
           <div class="result-box">
-            <p style="margin-bottom:8px;"><strong>🔬 التحليل الطبي:</strong> ${resJson.diagnosisAndCause}</p>
+            <p style="margin-bottom:10px; font-size:13px;"><strong>🔬 التشخيص الطبي:</strong> ${resJson.diagnosisAndCause}</p>
+            
+            <h4 style="font-size:13px; color:#0369a1; font-weight:800; margin-top:14px;">🛍️ المنتجات المقترحة حسب الفئة السعرية:</h4>
+            
+            <div class="price-category" style="border-right: 4px solid #7c3aed;">
+              <strong style="color:#7c3aed;">💎 فئة مستوردة / مستحضرات عالية (High-End):</strong>
+              ${renderProducts(resJson.products.highRange)}
+            </div>
+
+            <div class="price-category" style="border-right: 4px solid #0284c7;">
+              <strong style="color:#0284c7;">⚖️ فئة متوسطة (Mid-Range):</strong>
+              ${renderProducts(resJson.products.midRange)}
+            </div>
+
+            <div class="price-category" style="border-right: 4px solid #16a34a;">
+              <strong style="color:#16a34a;">🌱 فئة اقتصادية / محلية (Budget-Friendly):</strong>
+              ${renderProducts(resJson.products.economicRange)}
+            </div>
+
+            <h4 style="font-size:13px; color:#0369a1; font-weight:800; margin-top:16px;">📅 طريقة الاستخدام في الروتين:</h4>
             <div style="background:#f0f9ff; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #bae6fd;">
-              <p style="color:#0369a1;"><strong>☀️ الصباح:</strong> ${resJson.routine.morning.join(', ')}</p>
+              <p style="color:#0369a1;"><strong>☀️ روتين الصباح:</strong> ${resJson.routine.morning.join(' ⬅️ ')}</p>
             </div>
             <div style="background:#f8fafc; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #e2e8f0;">
-              <p style="color:#334155;"><strong>🌙 المساء:</strong> ${resJson.routine.evening.join(', ')}</p>
+              <p style="color:#334155;"><strong>🌙 روتين المساء:</strong> ${resJson.routine.evening.join(' ⬅️ ')}</p>
             </div>
           </div>`;
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
@@ -416,17 +487,4 @@
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
-        let branchesText = resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('');
-
-        container.innerHTML = `
-          <div class="result-box">
-            <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
-            <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
-            <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}</div>
-            <p style="color:#b91c1c; margin-top:8px; background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;"><strong>⚠️ علامات الخطر (Red Flags):</strong> ${resJson.redFlags.join(', ')}</p>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-  </script>
-</body>
-</html>
+        let branchesText = resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:<
