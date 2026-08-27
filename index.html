@@ -165,6 +165,12 @@
   </div>
 
   <script>
+    // كاشف الأخطاء التلقائي للموبايل (عشان يظهرلك أي خطأ في شاشة تنبيه فوراً)
+    window.onerror = function(msg, url, lineNo, columnNo, error) {
+      alert("⚠️ حدث خطأ في التطبيق: " + msg + "\nفي السطر: " + lineNo);
+      return false;
+    };
+
     let currentDrugForPediatric = "";
 
     window.onload = function() {
@@ -181,7 +187,9 @@
         localStorage.setItem('gemini_api_key', key);
         document.getElementById('apiKeySection').style.display = 'none';
         alert('تم حفظ المفتاح بنجاح! 🚀');
-      } else { alert('من فضلك أدخل مفتاح صحيح.'); }
+      } else { 
+        alert('من فضلك أدخل مفتاح صحيح.'); 
+      }
     }
 
     function openPage(pageId) {
@@ -200,17 +208,19 @@
 
     function handleQuickSearch() {
       const val = document.getElementById('quickSearchInput').value.trim();
-      if(val) {
-        openPage('pageAlgo');
-        document.getElementById('algoSearchInput').value = val;
-        askGeminiAlgorithm();
+      if(!val) {
+        alert("برجاء كتابة كلمة البحث أولاً.");
+        return;
       }
+      openPage('pageAlgo');
+      document.getElementById('algoSearchInput').value = val;
+      askGeminiAlgorithm();
     }
 
     function getApiKey() {
       const key = localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
       if(!key) {
-        alert('برجاء إدخال وحفظ Gemini API Key أولاً.');
+        alert('⚠️ برجاء إدخال وحفظ Gemini API Key أولاً في أعلى الصفحة.');
         document.getElementById('apiKeySection').style.display = 'flex';
         return null;
       }
@@ -221,8 +231,7 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      // إضافة CORS Proxy لتجاوز حظر الـ Vercel والفيتا للـ Frontend
-      const url = `https://corsproxy.io/?https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -242,14 +251,19 @@
 
     async function askGeminiDrug() {
       const query = document.getElementById('drugSearchInput').value.trim();
+      if(!query) {
+        alert("برجاء كتابة اسم الدواء أو السؤال أولاً!");
+        return;
+      }
       const container = document.getElementById('aiResultsDrug');
-      if(!query) return;
 
       container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ تحليل السؤال/المنتج بـ Gemini...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج/الاستفسار", "activeIngredients": ["المادة الفعالة 1"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "طريقة الاستخدام والجرعة الأساسية"}`;
         const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
+
         currentDrugForPediatric = resJson.name;
 
         let ingredientsHtml = resJson.activeIngredients.map(item => `<li class="flex items-center gap-1.5 text-xs text-gray-800 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span><span>${item}</span></li>`).join('');
@@ -280,7 +294,7 @@
             </div>
 
           </div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
     }
 
     async function calculatePediatricDose() {
@@ -300,6 +314,7 @@
         أرجع JSON فقط بالصيغة: {"dose": "مقدار الجرعة بالـ ml أو mg وعدد المرات يومياً باختصار شديد"}`;
         
         const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
         resContainer.innerHTML = `✅ **الجرعة المقترحة لوزن (${weight} كجم):** ${resJson.dose}`;
       } catch (err) {
         resContainer.innerHTML = `❌ حدث خطأ أثناء حساب الجرعة.`;
@@ -308,8 +323,11 @@
 
     async function askGeminiAlternatives() {
       const query = document.getElementById('altSearchInput').value.trim();
+      if(!query) {
+        alert("برجاء كتابة اسم الدواء أولاً!");
+        return;
+      }
       const container = document.getElementById('aiResultsAlt');
-      if(!query) return;
 
       container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ استخراج المثائل والبدائل المتاحة بـ Gemini...</div>`;
 
@@ -323,14 +341,7 @@
         }`;
 
         const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
 
         let genHtml = resJson.generics.map(item => `<li class="p-1.5 bg-emerald-50 rounded-lg text-emerald-950 font-bold text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>${item}</li>`).join('');
-        let subHtml = resJson.substitutes.map(item => `<li class="p-1.5 bg-teal-50 rounded-lg text-teal-950 font-bold text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>${item}</li>`).join('');
-
-        container.innerHTML = `
-          <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-200 space-y-4">
-            <div>
-              <h3 class="font-extrabold text-xs text-emerald-900 mb-2 flex items-center gap-1">🧪 المثائل المتاحة (Generics - نفس المادة الفعالة):</h3>
-              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${genHtml}</ul>
-            </div>
-            
+        let subHtml = resJson.substitutes.map(item => `<li class="p-1.5 bg-teal-50 rounded-lg text-teal-950 font-bold text-xs flex items-ce
