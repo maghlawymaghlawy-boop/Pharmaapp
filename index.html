@@ -5,69 +5,210 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم الطبية والصيدلانية</title>
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
-    body { background-color: #f1f5f9; color: #0f172a; padding-bottom: 30px; }
-    header { background-color: #115e59; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    header h1 { font-size: 18px; margin-bottom: 5px; }
-    header p { font-size: 11px; color: #ccfbf1; }
-    .container { max-width: 800px; margin: 15px auto; padding: 0 10px; }
-    .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 40px; }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, #115e59 0%, #0f766e 100%);
+      color: white;
+      padding: 18px 15px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(15, 118, 110, 0.15);
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+    header p { font-size: 11px; color: #ccfbf1; opacity: 0.9; margin-top: 3px; }
+
+    .container { max-width: 768px; margin: 15px auto; padding: 0 12px; }
+
+    /* Cards Layout */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+    .card-title { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+    /* Grid Options */
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     @media (min-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); } }
-    .btn-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.2s; }
-    .btn-card:active { background: #e2e8f0; transform: scale(0.98); }
-    .btn-card .icon { font-size: 24px; display: block; margin-bottom: 5px; }
-    .btn-card .title { font-size: 12px; font-weight: bold; color: #0f172a; display: block; }
+
+    /* Interactive Menu Buttons */
+    .btn-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 16px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-card:active { transform: scale(0.96); background: #f1f5f9; }
+    
+    .btn-card .icon-wrapper {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .btn-card .title { font-size: 12px; font-weight: 700; color: #1e293b; }
+    .btn-card .subtitle { font-size: 10px; color: #94a3b8; margin-top: 2px; }
+
+    /* Section Specific Styles */
+    .theme-drug .icon-wrapper { background: #ccfbf1; color: #0d9488; }
+    .theme-alt .icon-wrapper { background: #d1fae5; color: #059669; }
+    .theme-derma .icon-wrapper { background: #e0f2fe; color: #0284c7; }
+    .theme-algo .icon-wrapper { background: #fef3c7; color: #d97706; }
+
+    /* Inputs & Buttons */
     .input-group { display: flex; gap: 8px; margin-top: 8px; }
-    input[type="text"], input[type="password"], input[type="number"] { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; }
-    button.action-btn { background: #115e59; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-    button.action-btn:active { background: #0f766e; }
+    input[type="text"], input[type="password"], input[type="number"] {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font-size: 12px;
+      outline: none;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+    input:focus { border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1); }
+    
+    button.action-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 2px 6px rgba(13, 148, 136, 0.2);
+    }
+    button.action-btn:active { transform: scale(0.96); background: var(--primary-dark); }
+
+    /* Back Button */
+    .back-btn {
+      background: #ffffff;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    /* Result Box Styling */
+    .result-box {
+      background: #ffffff;
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      margin-top: 12px;
+      font-size: 12px;
+      line-height: 1.7;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+    .result-box h3 { font-size: 14px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+    .badge { background: #ccfbf1; color: #0f766e; font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 800; }
+    
+    .result-item {
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #f1f5f9;
+      margin-top: 8px;
+    }
+    .result-item-title { font-weight: 700; color: #334155; margin-bottom: 2px; }
+
+    .loading { text-align: center; color: var(--primary); font-weight: 700; padding: 20px; font-size: 12px; }
     .hidden { display: none !important; }
-    .back-btn { background: #0f766e; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; margin-bottom: 10px; }
-    .result-box { background: white; border-radius: 10px; padding: 12px; border: 1px solid #cbd5e1; margin-top: 10px; font-size: 12px; line-height: 1.6; }
-    .loading { text-align: center; color: #0f766e; font-weight: bold; padding: 10px; font-size: 12px; }
-    .badge { background: #ccfbf1; color: #0f766e; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
   </style>
 </head>
 <body>
 
   <header>
     <h1>🩺 لوحة التحكم الطبية والصيدلانية</h1>
-    <p>منصة الدعم السريري والتجميلي السريعة</p>
+    <p>المساعد السريري والتجميلي بالذكاء الاصطناعي</p>
   </header>
 
   <div class="container">
 
     <!-- API Key Section -->
-    <div id="apiKeySection" class="card" style="background-color: #fffbeb; border-color: #fef3c7;">
-      <span style="font-size: 11px; font-weight: bold; color: #92400e;">⚠️ إعداد مفتاح Gemini API:</span>
+    <div id="apiKeySection" class="card" style="background: #fffbeb; border-color: #fef3c7;">
+      <span style="font-size: 11px; font-weight: 700; color: #92400e;">⚠️ إعداد مفتاح Gemini API (مطلوب لمرة واحدة):</span>
       <div class="input-group">
-        <input type="password" id="apiKeyInput" placeholder="الصق المفتاح هنا..." />
-        <button class="action-btn" style="background-color: #b45309;" onclick="saveApiKey()">حفظ</button>
+        <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." />
+        <button class="action-btn" style="background-color: #b45309;" onclick="saveApiKey()">حفظ المفتاح</button>
       </div>
     </div>
 
     <!-- MAIN DASHBOARD PAGE -->
     <div id="pageDashboard">
       <div class="card">
-        <h2 style="font-size: 13px; font-weight: bold; color: #334155;">الأقسام الرئيسية</h2>
+        <div class="card-title"><span>🚀</span> الأقسام الرئيسية</div>
         <div class="grid">
-          <div class="btn-card" onclick="openPage('pageDrug')">
-            <span class="icon">💊</span>
+          
+          <div class="btn-card theme-drug" onclick="openPage('pageDrug')">
+            <div class="icon-wrapper">💊</div>
             <span class="title">المساعد الدوائي</span>
+            <span class="subtitle">Drug Assistant</span>
           </div>
-          <div class="btn-card" onclick="openPage('pageAlt')">
-            <span class="icon">🔄</span>
+
+          <div class="btn-card theme-alt" onclick="openPage('pageAlt')">
+            <div class="icon-wrapper">🔄</div>
             <span class="title">المثائل والبدائل</span>
+            <span class="subtitle">Generics</span>
           </div>
-          <div class="btn-card" onclick="openPage('pageDerma')">
-            <span class="icon">✨</span>
+
+          <div class="btn-card theme-derma" onclick="openPage('pageDerma')">
+            <div class="icon-wrapper">✨</div>
             <span class="title">الشعر والبشرة</span>
+            <span class="subtitle">Skin & Hair</span>
           </div>
-          <div class="btn-card" onclick="openPage('pageAlgo')">
-            <span class="icon">🌿</span>
+
+          <div class="btn-card theme-algo" onclick="openPage('pageAlgo')">
+            <div class="icon-wrapper">🌿</div>
             <span class="title">الخوارزميات</span>
+            <span class="subtitle">Algorithms</span>
           </div>
+
         </div>
       </div>
     </div>
@@ -76,10 +217,10 @@
     <div id="pageDrug" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 style="font-size: 13px; font-weight: bold; color: #115e59;">💊 المساعد الدوائي</h2>
+        <div class="card-title" style="color: #0d9488;">💊 المساعد الدوائي والمنتجات</div>
         <div class="input-group">
-          <input type="text" id="drugSearchInput" placeholder="اكتب اسم الدواء أو السؤال..." />
-          <button class="action-btn" onclick="askGeminiDrug()">بحث</button>
+          <input type="text" id="drugSearchInput" placeholder="اكتب اسم الدواء أو استفسارك هنا..." />
+          <button class="action-btn" onclick="askGeminiDrug()">بحث 🔍</button>
         </div>
       </div>
       <div id="aiResultsDrug"></div>
@@ -89,10 +230,10 @@
     <div id="pageAlt" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 style="font-size: 13px; font-weight: bold; color: #047857;">🔄 المثائل والبدائل</h2>
+        <div class="card-title" style="color: #059669;">🔄 المثائل والبدائل المتاحة</div>
         <div class="input-group">
-          <input type="text" id="altSearchInput" placeholder="اسم الدواء..." />
-          <button class="action-btn" style="background-color: #047857;" onclick="askGeminiAlternatives()">عرض البدائل</button>
+          <input type="text" id="altSearchInput" placeholder="اكتب اسم الدواء المطلوب بدائله..." />
+          <button class="action-btn" style="background-color: #059669;" onclick="askGeminiAlternatives()">عرض البدائل 🔄</button>
         </div>
       </div>
       <div id="aiResultsAlt"></div>
@@ -102,10 +243,10 @@
     <div id="pageDerma" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 style="font-size: 13px; font-weight: bold; color: #0369a1;">✨ الشعر والبشرة</h2>
+        <div class="card-title" style="color: #0284c7;">✨ استشارات الشعر والبشرة</div>
         <div class="input-group">
-          <input type="text" id="dermaSearchInput" placeholder="وصف المشكلة..." />
-          <button class="action-btn" style="background-color: #0369a1;" onclick="askGeminiDerma()">تحليل</button>
+          <input type="text" id="dermaSearchInput" placeholder="صف الحالة أو نوع المشكلة الجلدية..." />
+          <button class="action-btn" style="background-color: #0284c7;" onclick="askGeminiDerma()">تحليل الروتين 💡</button>
         </div>
       </div>
       <div id="aiResultsDerma"></div>
@@ -115,10 +256,10 @@
     <div id="pageAlgo" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 style="font-size: 13px; font-weight: bold; color: #b45309;">🌿 الخوارزميات الطبية</h2>
+        <div class="card-title" style="color: #d97706;">🌿 الخوارزميات والبروتوكولات الطبية</div>
         <div class="input-group">
-          <input type="text" id="algoSearchInput" placeholder="اسم الحالة الطبية..." />
-          <button class="action-btn" style="background-color: #b45309;" onclick="askGeminiAlgorithm()">رسم الخريطة</button>
+          <input type="text" id="algoSearchInput" placeholder="اكتب التشخيص أو الحالة الطبية..." />
+          <button class="action-btn" style="background-color: #d97706;" onclick="askGeminiAlgorithm()">رسم الخريطة 🗺️</button>
         </div>
       </div>
       <div id="aiResultsAlgo"></div>
@@ -127,7 +268,6 @@
   </div>
 
   <script>
-    // التأكد التام من عمل النص البرمجي
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey) {
@@ -195,7 +335,7 @@
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDrug');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال بـ Gemini...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل البيانات بـ Gemini AI...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير. قم بتحليل الطلب: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
@@ -204,10 +344,19 @@
 
         container.innerHTML = `
           <div class="result-box">
-            <h3 style="font-size:14px; color:#115e59; font-weight:bold;">${resJson.name} <span class="badge">Gemini AI</span></h3>
-            <p style="margin-top:5px;"><strong>🧪 المكونات:</strong> ${resJson.activeIngredients.join(', ')}</p>
-            <p style="margin-top:5px;"><strong>🎯 دواعي الاستعمال:</strong> ${resJson.indications}</p>
-            <p style="margin-top:5px;"><strong>💊 الجرعة:</strong> ${resJson.dosageAndUsage}</p>
+            <h3 style="color:#0d9488;">${resJson.name} <span class="badge">Gemini AI</span></h3>
+            <div class="result-item">
+              <div class="result-item-title">🧪 المكونات الفعالة:</div>
+              <div>${resJson.activeIngredients.join(', ')}</div>
+            </div>
+            <div class="result-item">
+              <div class="result-item-title">🎯 دواعي الاستعمال والإجابة:</div>
+              <div>${resJson.indications}</div>
+            </div>
+            <div class="result-item">
+              <div class="result-item-title">💊 الجرعة وكيفية الاستخدام:</div>
+              <div>${resJson.dosageAndUsage}</div>
+            </div>
           </div>`;
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
@@ -217,7 +366,7 @@
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
       
       const container = document.getElementById('aiResultsAlt');
-      container.innerHTML = `<div class="loading">⏳ جارِ استخراج البدائل...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ البحث عن المثائل والبدائل...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير بالسوق المصري. استخرج المثائل والبدائل للدواء: "${query}". أرجع JSON بالشكل: {"generics": ["مثيل 1"], "substitutes": ["بديل 1"]}`;
@@ -226,11 +375,15 @@
 
         container.innerHTML = `
           <div class="result-box">
-            <p><strong>🧪 المثائل (نفس المادة الفعالة):</strong></p>
-            <p style="color:#047857; font-weight:bold;">${resJson.generics.join(' - ')}</p>
-            <hr style="margin:8px 0; border:0; border-top:1px solid #e2e8f0;">
-            <p><strong>🔄 البدائل (نفس التأثير):</strong></p>
-            <p style="color:#0f766e; font-weight:bold;">${resJson.substitutes.join(' - ')}</p>
+            <h3 style="color:#059669;">نتائج البدائل لـ: ${query}</h3>
+            <div class="result-item" style="border-right: 3px solid #059669;">
+              <div class="result-item-title" style="color:#059669;">🧪 المثائل (Generics - نفس المادة الفعالة):</div>
+              <div style="font-weight:bold; color:#0f172a; margin-top:4px;">${resJson.generics.join(' • ')}</div>
+            </div>
+            <div class="result-item" style="border-right: 3px solid #0d9488; margin-top:10px;">
+              <div class="result-item-title" style="color:#0d9488;">🔄 البدائل (Substitutes - نفس المجموعة/التأثير):</div>
+              <div style="font-weight:bold; color:#0f172a; margin-top:4px;">${resJson.substitutes.join(' • ')}</div>
+            </div>
           </div>`;
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
@@ -249,9 +402,19 @@
 
         container.innerHTML = `
           <div class="result-box">
-            <p><strong>🔬 التحليل:</strong> ${resJson.diagnosisAndCause}</p>
-            <p style="margin-top:5px;"><strong>☀️ الصباح:</strong> ${resJson.routine.morning.join(', ')}</p>
-            <p style="margin-top:5px;"><strong>🌙 المساء:</strong> ${resJson.routine.evening.join(', ')}</p>
+            <h3 style="color:#0284c7;">التحليل والروتين المقترح</h3>
+            <div class="result-item">
+              <div class="result-item-title">🔬 التشخيص المبدئي:</div>
+              <div>${resJson.diagnosisAndCause}</div>
+            </div>
+            <div class="result-item" style="margin-top:8px;">
+              <div class="result-item-title">☀️ الروتين الصباحي:</div>
+              <div>${resJson.routine.morning.join(' ⬅️ ')}</div>
+            </div>
+            <div class="result-item" style="margin-top:8px;">
+              <div class="result-item-title">🌙 الروتين المسائي:</div>
+              <div>${resJson.routine.evening.join(' ⬅️ ')}</div>
+            </div>
           </div>`;
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
@@ -268,14 +431,26 @@
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
-        let branchesText = resJson.branches.map(b => `<p>• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('');
+        let branchesText = resJson.branches.map(b => `
+          <div style="background:#ffffff; padding:8px 10px; border-radius:8px; border-right:3px solid #d97706; margin-top:6px;">
+            <strong style="color:#b45309;">${b.decisionCriteria}:</strong> ${b.actionStep}
+          </div>`).join('');
 
         container.innerHTML = `
           <div class="result-box">
-            <h3 style="font-size:13px; color:#b45309;">${resJson.conditionTitle}</h3>
-            <p style="margin-bottom:8px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
-            <div style="background:#f8fafc; padding:8px; border-radius:6px; margin:5px 0;">${branchesText}</div>
-            <p style="color:#b91c1c; margin-top:5px;"><strong>⚠️ علامات الخطر:</strong> ${resJson.redFlags.join(', ')}</p>
+            <h3 style="color:#d97706;">${resJson.conditionTitle}</h3>
+            <div class="result-item">
+              <div class="result-item-title">📋 التقييم المبدئي:</div>
+              <div>${resJson.initialAssessment}</div>
+            </div>
+            <div style="margin-top:10px;">
+              <div style="font-weight:700; color:#475569; margin-bottom:4px;">🌿 مسارات التصرف الطبي:</div>
+              ${branchesText}
+            </div>
+            <div class="result-item" style="background:#fef2f2; border-color:#fee2e2; margin-top:10px;">
+              <div class="result-item-title" style="color:#dc2626;">⚠️ علامات الخطر (Red Flags):</div>
+              <div style="color:#991b1b;">${resJson.redFlags.join(' • ')}</div>
+            </div>
           </div>`;
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
