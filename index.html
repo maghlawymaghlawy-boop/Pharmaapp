@@ -25,6 +25,7 @@
     * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 40px; }
 
+    /* Header */
     header { 
       background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); 
       color: white; 
@@ -40,6 +41,7 @@
 
     .container { max-width: 800px; margin: 20px auto; padding: 0 16px; }
 
+    /* Cards */
     .card { 
       background: var(--card-bg); 
       border-radius: var(--radius-lg); 
@@ -49,9 +51,11 @@
       box-shadow: var(--shadow-sm);
     }
 
+    /* Grid Setup */
     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
     @media (min-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
+    /* Modern Dashboard Action Cards */
     .btn-card { 
       background: #ffffff; 
       border: 1px solid var(--border-color); 
@@ -71,6 +75,7 @@
     .btn-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
     .btn-card:active { transform: scale(0.96); }
 
+    /* Dynamic Card Accent Colors */
     .btn-card.drug { border-top: 4px solid #0f766e; }
     .btn-card.alt { border-top: 4px solid #047857; }
     .btn-card.derma { border-top: 4px solid #0369a1; }
@@ -79,6 +84,7 @@
     .btn-card .icon { font-size: 28px; margin-bottom: 8px; display: block; }
     .btn-card .title { font-size: 13px; font-weight: 800; color: var(--text-main); display: block; }
 
+    /* Form Controls & Inputs */
     .input-group { display: flex; gap: 10px; margin-top: 12px; }
     input[type="text"], input[type="password"], input[type="number"] { 
       flex: 1; 
@@ -126,6 +132,7 @@
     }
     .back-btn:active { transform: scale(0.95); background: #f1f5f9; }
 
+    /* Elegant Result Containers */
     .result-box { 
       background: #ffffff; 
       border-radius: var(--radius-lg); 
@@ -176,6 +183,7 @@
 
   <div class="container">
 
+    <!-- API Key Section -->
     <div id="apiKeySection" class="card" style="background-color: #fffbeb; border-color: #fef08a;">
       <span style="font-size: 12px; font-weight: bold; color: #854d0e;">⚠️ إعداد مفتاح Gemini API (مطلوب مرة واحدة):</span>
       <div class="input-group">
@@ -184,6 +192,7 @@
       </div>
     </div>
 
+    <!-- MAIN DASHBOARD PAGE -->
     <div id="pageDashboard">
       <div class="card">
         <h2 style="font-size: 14px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">الأقسام الرئيسية</h2>
@@ -208,6 +217,7 @@
       </div>
     </div>
 
+    <!-- PAGE 1: DRUG ASSISTANT -->
     <div id="pageDrug" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -220,6 +230,7 @@
       <div id="aiResultsDrug"></div>
     </div>
 
+    <!-- PAGE 2: ALTERNATIVES -->
     <div id="pageAlt" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -232,18 +243,20 @@
       <div id="aiResultsAlt"></div>
     </div>
 
+    <!-- PAGE 3: DERMA -->
     <div id="pageDerma" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
         <h2 style="font-size: 14px; font-weight: 800; color: #0369a1; margin-bottom: 4px;">✨ الشعر والبشرة</h2>
         <div class="input-group">
-          <input type="text" id="dermaSearchInput" placeholder="مثال: تساقط الشعر، حب الشباب..." />
+          <input type="text" id="dermaSearchInput" placeholder="وصف المشكلة الجلدية..." />
           <button class="action-btn" style="background-color: #0369a1;" onclick="askGeminiDerma()">تحليل</button>
         </div>
       </div>
       <div id="aiResultsDerma"></div>
     </div>
 
+    <!-- PAGE 4: ALGORITHMS -->
     <div id="pageAlgo" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -259,6 +272,7 @@
   </div>
 
   <script>
+    // التأكد التام من عمل النص البرمجي
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey) {
@@ -299,117 +313,34 @@
       return key;
     }
 
-    // ========== الدالة الرئيسية المحسنة 100% ==========
     async function fetchGemini(promptText) {
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }] }]
-          })
-        });
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
+      });
 
-        const data = await response.json();
-        
-        if (data.error) {
-          throw new Error('خطأ من Gemini: ' + data.error.message);
-        }
-        
-        if (!data.candidates || !data.candidates[0]) {
-          throw new Error('لم يتم استلام استجابة صحيحة');
-        }
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message || 'خطأ في API');
+      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة.');
 
-        let rawText = data.candidates[0].content.parts[0].text.trim();
-        console.log('📝 الرد الخام من Gemini:', rawText);
-
-        let jsonData = null;
-        
-        // محاولة استخراج JSON بطرق متعددة
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            jsonData = JSON.parse(jsonMatch[0]);
-          } catch (e) {}
-        }
-
-        if (!jsonData) {
-          try {
-            jsonData = JSON.parse(rawText);
-          } catch (e) {}
-        }
-
-        if (!jsonData) {
-          try {
-            let cleanText = rawText.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
-            jsonData = JSON.parse(cleanText);
-          } catch (e) {}
-        }
-
-        // إذا فشل كل شيء، نرجع كائن افتراضي
-        if (!jsonData) {
-          console.warn('⚠️ لم نتمكن من استخراج JSON، نرجع بيانات افتراضية');
-          // تحديد نوع البيانات المطلوبة من الـ Prompt
-          if (promptText.includes('المشكلة') || promptText.includes('البشرة')) {
-            jsonData = {
-              diagnosis: "لم نتمكن من تحليل المشكلة، يرجى إعادة المحاولة",
-              products: {
-                premium: [{ name: "منتج غير متوفر", ingredients: ["غير محدد"] }],
-                mid: [{ name: "منتج غير متوفر", ingredients: ["غير محدد"] }],
-                budget: [{ name: "منتج غير متوفر", ingredients: ["غير محدد"] }]
-              }
-            };
-          } else if (promptText.includes('بدائل')) {
-            jsonData = {
-              generics: ["غير متوفر"],
-              substitutes: ["غير متوفر"]
-            };
-          } else if (promptText.includes('خوارزمية')) {
-            jsonData = {
-              conditionTitle: "غير متوفر",
-              initialAssessment: "غير متوفر",
-              branches: [{ decisionCriteria: "غير متوفر", actionStep: "غير متوفر" }],
-              redFlags: ["غير متوفر"]
-            };
-          } else {
-            jsonData = {
-              name: "غير متوفر",
-              activeIngredients: ["غير متوفر"],
-              indications: "غير متوفر",
-              dosageAndUsage: "غير متوفر"
-            };
-          }
-        }
-
-        return jsonData;
-
-      } catch (error) {
-        console.error('❌ خطأ في fetchGemini:', error);
-        // نرجع كائن افتراضي
-        return {
-          diagnosis: "حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى",
-          products: {
-            premium: [{ name: "خطأ في الاتصال", ingredients: ["غير متوفر"] }],
-            mid: [{ name: "خطأ في الاتصال", ingredients: ["غير متوفر"] }],
-            budget: [{ name: "خطأ في الاتصال", ingredients: ["غير متوفر"] }]
-          }
-        };
-      }
+      let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
     }
 
-    // ========== الدوال الأربعة ==========
-    
     async function askGeminiDrug() {
       const query = document.getElementById('drugSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDrug');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال بـ Gemini...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير. قم بتحليل الطلب: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
@@ -423,10 +354,7 @@
             <p style="margin-top:6px;"><strong>🎯 دواعي الاستعمال:</strong> ${resJson.indications}</p>
             <p style="margin-top:6px;"><strong>💊 الجرعة:</strong> ${resJson.dosageAndUsage}</p>
           </div>`;
-      } catch (err) { 
-        alert("خطأ: " + err.message); 
-        container.innerHTML = ''; 
-      }
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
 
     async function askGeminiAlternatives() {
@@ -449,10 +377,7 @@
             <p style="margin-bottom:4px;"><strong>🔄 البدائل (نفس التأثير):</strong></p>
             <p style="color:#0f766e; font-weight:800; background:#f0fdf4; padding:8px 12px; border-radius:8px;">${resJson.substitutes.join(' - ')}</p>
           </div>`;
-      } catch (err) { 
-        alert("خطأ: " + err.message); 
-        container.innerHTML = ''; 
-      }
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
 
     async function askGeminiDerma() {
@@ -460,60 +385,49 @@
       if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDerma');
-      container.innerHTML = `<div class="loading">⏳ جارِ البحث عن منتجات للسوق المصري...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وصياغة الروتين...</div>`;
 
       try {
-        const prompt = `مشكلة: ${query}
-        
-مطلوب:
-1. شرح بسيط للمشكلة
-2. 3 منتجات من السوق المصري (محلية أو مستوردة) مع تصنيفها:
-   - ممتازة
-   - متوسطة
-   - اقتصادية
-3. تحت كل منتج اكتب المواد الفعالة
-
-أرجِع JSON فقط بهذا الشكل:
-{
-  "diagnosis": "شرح المشكلة",
-  "products": {
-    "premium": [{"name": "اسم المنتج", "ingredients": ["مادة", "مادة"]}],
-    "mid": [{"name": "اسم المنتج", "ingredients": ["مادة", "مادة"]}],
-    "budget": [{"name": "اسم المنتج", "ingredients": ["مادة", "مادة"]}]
-  }
-}`;
-
+        const prompt = `أنت طبيب جلدي. قم بتحليل المشكلة: "${query}". أرجع JSON بالتراكيب: {"diagnosisAndCause": "التشخيص", "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
-        let productsHTML = '';
-        const categories = [
-          { key: 'premium', label: '⭐ ممتازة', color: '#065f46', bg: '#ecfdf5' },
-          { key: 'mid', label: '🌟 متوسطة', color: '#0369a1', bg: '#f0f9ff' },
-          { key: 'budget', label: '💰 اقتصادية', color: '#92400e', bg: '#fffbeb' }
-        ];
+        container.innerHTML = `
+          <div class="result-box">
+            <p style="margin-bottom:8px;"><strong>🔬 التحليل الطبي:</strong> ${resJson.diagnosisAndCause}</p>
+            <div style="background:#f0f9ff; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #bae6fd;">
+              <p style="color:#0369a1;"><strong>☀️ الصباح:</strong> ${resJson.routine.morning.join(', ')}</p>
+            </div>
+            <div style="background:#f8fafc; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #e2e8f0;">
+              <p style="color:#334155;"><strong>🌙 المساء:</strong> ${resJson.routine.evening.join(', ')}</p>
+            </div>
+          </div>`;
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
+    }
 
-        categories.forEach(cat => {
-          const items = resJson.products[cat.key] || [];
-          if(items.length > 0) {
-            productsHTML += `<div style="margin-top: 10px; background: ${cat.bg}; padding: 10px; border-radius: 8px; border-right: 3px solid ${cat.color};">`;
-            productsHTML += `<p style="font-weight: 700; color: ${cat.color}; margin-bottom: 4px;">${cat.label}</p>`;
-            items.forEach(item => {
-              const ingredients = item.ingredients || ['غير محدد'];
-              productsHTML += `<div style="background: white; padding: 8px; border-radius: 6px; margin-bottom: 6px; border: 1px solid #e2e8f0;">`;
-              productsHTML += `<p style="font-weight: 600;">🧴 ${item.name}</p>`;
-              productsHTML += `<p style="font-size: 12px; color: #475569;"><strong>المكونات:</strong> ${ingredients.join('، ')}</p>`;
-              productsHTML += `</div>`;
-            });
-            productsHTML += `</div>`;
-          }
-        });
+    async function askGeminiAlgorithm() {
+      const query = document.getElementById('algoSearchInput').value.trim();
+      if(!query) { alert("برجاء كتابة الحالة الطبية أولاً!"); return; }
+      
+      const container = document.getElementById('aiResultsAlgo');
+      container.innerHTML = `<div class="loading">⏳ جارِ رسم الخريطة الشجرية...</div>`;
+
+      try {
+        const prompt = `أنت طبيب استشاري. أنشئ خوارزمية للحالة: "${query}". أرجع JSON: {"conditionTitle": "الحالة", "initialAssessment": "التقييم", "branches": [{"decisionCriteria": "المعيار", "actionStep": "الإجراء"}], "redFlags": ["عرض خطير"]}`;
+        const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
+
+        let branchesText = resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('');
 
         container.innerHTML = `
           <div class="result-box">
-            <h3 style="font-size:15px; color:#0369a1; font-weight:800;">✨ منتجات السوق المصري</h3>
-            <p style="background: #f8fafc; padding: 10px; border-radius: 8px; margin: 8px 0;">
-              <strong>📋 التشخيص:</strong> ${resJson.diagnosis || 'غير متوفر'}
-            </p>
-            ${productsHTML || '<p style="color: #dc2626;">⚠️ لم يتم العثور على منتجات</p>'}
-            <p style="font-size: 11px; color: #94a3b8; margin-top: 10px;">
+            <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
+            <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
+            <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}</div>
+            <p style="color:#b91c1c; margin-top:8px; background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;"><strong>⚠️ علامات الخطر (Red Flags):</strong> ${resJson.redFlags.join(', ')}</p>
+          </div>`;
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
+    }
+  </script>
+</body>
+</html>
