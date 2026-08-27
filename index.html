@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -86,7 +85,7 @@
 
     /* Form Controls & Inputs */
     .input-group { display: flex; gap: 10px; margin-top: 12px; }
-    input[type="text"], input[type="password"], input[type="number"] { 
+    input[type="text"], input[type="password"], input[type="number"], select { 
       flex: 1; 
       padding: 12px 14px; 
       border: 1.5px solid #cbd5e1; 
@@ -96,7 +95,7 @@
       background: #ffffff;
       transition: all 0.2s;
     }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15); }
+    input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15); }
 
     button.action-btn { 
       background: var(--primary); 
@@ -177,7 +176,7 @@
         <h1>🩺 لوحة التحكم الطبية والصيدلانية</h1>
         <p>منصة الدعم السريري والتجميلي السريعة</p>
       </div>
-      <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff;">v2.0 Pro</span>
+      <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff;">v2.5 Pro</span>
     </div>
   </header>
 
@@ -217,16 +216,64 @@
       </div>
     </div>
 
-    <!-- PAGE 1: DRUG ASSISTANT -->
+    <!-- PAGE 1: DRUG ASSISTANT + PEDIATRIC CALCULATOR -->
     <div id="pageDrug" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
+      
+      <!-- البحث العام عن الدواء -->
       <div class="card">
-        <h2 style="font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 4px;">💊 المساعد الدوائي</h2>
+        <h2 style="font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 4px;">💊 المساعد الدوائي العام</h2>
         <div class="input-group">
-          <input type="text" id="drugSearchInput" placeholder="اكتب اسم الدواء أو السؤال الطبية..." />
+          <input type="text" id="drugSearchInput" placeholder="اكتب اسم الدواء أو السؤال الطبي..." />
           <button class="action-btn" onclick="askGeminiDrug()">بحث</button>
         </div>
       </div>
+
+      <!-- حاسبة جرعات الأطفال -->
+      <div class="card" style="border-right: 4px solid #0f766e; background: #f0fdf4;">
+        <h2 style="font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 4px;">👶 حاسبة جرعات الأطفال (Pediatric Dose Calculator)</h2>
+        <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">أدخل الوزن بالـ kg، أو أدخل العمر وسيتم تقدير الوزن تقريبياً تلقائياً.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+          <div>
+            <label style="font-size: 11px; font-weight: bold; color: #334155;">العمر:</label>
+            <div style="display: flex; gap: 4px;">
+              <input type="number" id="pedAge" placeholder="الرقم" oninput="calculatePediatricWeight()" style="padding: 8px; font-size: 12px;" />
+              <select id="pedAgeUnit" onchange="calculatePediatricWeight()" style="border-radius: var(--radius-md); border: 1.5px solid #cbd5e1; font-size: 11px; padding: 4px;">
+                <option value="years">سنة</option>
+                <option value="months">شهر</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size: 11px; font-weight: bold; color: #334155;">الوزن (Kg):</label>
+            <input type="number" id="pedWeight" placeholder="الوزن بالـ كجم" style="padding: 8px; font-size: 12px;" />
+          </div>
+
+          <div>
+            <label style="font-size: 11px; font-weight: bold; color: #334155;">الجرعة المطلوبة (mg/kg):</label>
+            <input type="number" id="pedDoseMgKg" placeholder="مثال: 15" style="padding: 8px; font-size: 12px;" />
+          </div>
+
+          <div>
+            <label style="font-size: 11px; font-weight: bold; color: #334155;">تركيز الدواء (mg / ml):</label>
+            <div style="display: flex; gap: 4px; align-items: center;">
+              <input type="number" id="pedActiveMg" placeholder="mg" style="padding: 8px; font-size: 12px;" />
+              <span style="font-size: 12px;">/</span>
+              <input type="number" id="pedVolMl" placeholder="ml" value="5" style="padding: 8px; font-size: 12px;" />
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="action-btn" style="flex: 1;" onclick="calculatePediatricDose()">احسب الجرعة 🧮</button>
+          <button class="action-btn" style="background-color: #0369a1;" onclick="askGeminiPedDose()">تأكيد مع الذكاء الاصطناعي 🤖</button>
+        </div>
+
+        <div id="pedCalcResult" style="margin-top: 10px;"></div>
+      </div>
+
       <div id="aiResultsDrug"></div>
     </div>
 
@@ -272,7 +319,6 @@
   </div>
 
   <script>
-    // التأكد التام من عمل النص البرمجي
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey) {
@@ -317,13 +363,14 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+      // استخدام موديل محدد ومستقر gemini-2.5-flash
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }]
+          contents: [{ parts: [{ text: promptText + "\nIMPORTANT: Return ONLY valid JSON." }] }]
         })
       });
 
@@ -331,103 +378,121 @@
       if (data.error) throw new Error(data.error.message || 'خطأ في API');
       if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة.');
 
-      let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
-      return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+      let rawText = data.candidates[0].content.parts[0].text.trim();
+      
+      // تنظيف النص من أوساط الكود JSON إن وجدت
+      rawText = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
+      
+      const jsonStart = rawText.indexOf('{');
+      const jsonEnd = rawText.lastIndexOf('}');
+      if (jsonStart !== -1 && jsonEnd !== -1) {
+        rawText = rawText.substring(jsonStart, jsonEnd + 1);
+      }
+
+      return JSON.parse(rawText);
     }
 
-    async function askGeminiDrug() {
-      const query = document.getElementById('drugSearchInput').value.trim();
-      if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
-      
-      const container = document.getElementById('aiResultsDrug');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال بـ Gemini...</div>`;
+    /* --- 1. حاسبة جرعات الأطفال --- */
+
+    // حساب الوزن التقريبي بناءً على العمر
+    function calculatePediatricWeight() {
+      const ageVal = parseFloat(document.getElementById('pedAge').value);
+      const unit = document.getElementById('pedAgeUnit').value;
+      const weightInput = document.getElementById('pedWeight');
+
+      if (isNaN(ageVal) || ageVal <= 0) return;
+
+      let estimatedWeight = 0;
+
+      if (unit === 'months') {
+        // للأطفال أقل من سنة: (العمر بالأشهر + 9) / 2
+        estimatedWeight = (ageVal + 9) / 2;
+      } else {
+        // للأطفال من سنة وما فوق
+        if (ageVal <= 5) {
+          estimatedWeight = (ageVal * 2) + 8; // معادلة APLS للطفل حتى 5 سنوات
+        } else {
+          estimatedWeight = (ageVal * 3) + 7; // معادلة APLS المحدثة للأطفال فوق 5 سنوات
+        }
+      }
+
+      weightInput.value = estimatedWeight.toFixed(1);
+    }
+
+    // حساب الجرعة بالـ mg والـ ml
+    function calculatePediatricDose() {
+      const weight = parseFloat(document.getElementById('pedWeight').value);
+      const dosePerKg = parseFloat(document.getElementById('pedDoseMgKg').value);
+      const activeMg = parseFloat(document.getElementById('pedActiveMg').value);
+      const volMl = parseFloat(document.getElementById('pedVolMl').value) || 5;
+      const resultDiv = document.getElementById('pedCalcResult');
+
+      if (isNaN(weight) || weight <= 0) {
+        alert("برجاء إدخال الوزن أو أدخل العمر لحسابه تقريبياً.");
+        return;
+      }
+
+      if (isNaN(dosePerKg) || dosePerKg <= 0) {
+        alert("برجاء إدخال الجرعة المطلوبة لكل كجم (mg/kg).");
+        return;
+      }
+
+      // إجمالي الجرعة بالـ mg
+      const totalMg = weight * dosePerKg;
+
+      let htmlResult = `
+        <div class="result-box" style="background: #ffffff; border-right: 4px solid #0f766e;">
+          <p><strong>⚖️ الوزن المعتمد:</strong> ${weight} كجم</p>
+          <p><strong>🎯 إجمالي الجرعة للمرة الواحدة/اليوم:</strong> <span style="color:#0f766e; font-weight:800;">${totalMg.toFixed(1)} mg</span></p>
+      `;
+
+      // حساب الحجم بالـ ml إذا أُدخل التركيز
+      if (!isNaN(activeMg) && activeMg > 0) {
+        const singleDoseMl = (totalMg * volMl) / activeMg;
+        htmlResult += `
+          <p style="margin-top:6px; background:#e6fffa; padding:8px; border-radius:8px; color:#065f46;">
+            <strong>🧪 الكمية المطلوبة بالشراب:</strong> <span style="font-size:16px; font-weight:800;">${singleDoseMl.toFixed(1)} مل (ml)</span> 
+            <br><small>(بناءً على تركيز ${activeMg}mg / ${volMl}ml)</small>
+          </p>
+        `;
+      }
+
+      htmlResult += `</div>`;
+      resultDiv.innerHTML = htmlResult;
+    }
+
+    // الاستعانة بـ Gemini للتحقق من جرعة طفل لدواء محدد
+    async function askGeminiPedDose() {
+      const drugName = document.getElementById('drugSearchInput').value.trim();
+      const weight = document.getElementById('pedWeight').value;
+      const age = document.getElementById('pedAge').value;
+      const ageUnit = document.getElementById('pedAgeUnit').value;
+
+      if (!drugName) {
+        alert("يرجى كتابة اسم الدواء في خانة 'المساعد الدوائي العام' بالأعلى أولاً.");
+        return;
+      }
+
+      const container = document.getElementById('pedCalcResult');
+      container.innerHTML = `<div class="loading">⏳ جارِ فحص الجرعة الموصى بها علمياً لهذا الدواء...</div>`;
 
       try {
-        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
+        const prompt = `أنت صيدلي خبير. قم بحساب وتأكيد جرعة الدواء "${drugName}" لطفل عمره ${age || 'غير محدد'} ${ageUnit} ووزنه ${weight || 'غير محدد'} كجم. 
+        أرجع JSON فقط بالصيغة: 
+        {
+          "recommendedDose": "الجرعة بالـ mg لكل كجم", 
+          "maxDose": "الجرعة القصوى اليومية", 
+          "instructions": "تعليمات تقسيم الجرعات (مثلاً كل 8 ساعات)",
+          "notes": "تحذيرات أو ملاحظات صيدلانية مهمة"
+        }`;
+
         const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
+        if (!resJson) return;
 
         container.innerHTML = `
-          <div class="result-box">
-            <h3 style="font-size:15px; color:#0f766e; font-weight:800;">${resJson.name} <span class="badge">Gemini AI</span></h3>
-            <p style="margin-top:8px;"><strong>🧪 المكونات:</strong> ${resJson.activeIngredients.join(', ')}</p>
-            <p style="margin-top:6px;"><strong>🎯 دواعي الاستعمال:</strong> ${resJson.indications}</p>
-            <p style="margin-top:6px;"><strong>💊 الجرعة:</strong> ${resJson.dosageAndUsage}</p>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-
-    async function askGeminiAlternatives() {
-      const query = document.getElementById('altSearchInput').value.trim();
-      if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
-      
-      const container = document.getElementById('aiResultsAlt');
-      container.innerHTML = `<div class="loading">⏳ جارِ استخراج البدائل...</div>`;
-
-      try {
-        const prompt = `أنت صيدلي خبير بالسوق المصري. استخرج المثائل والبدائل للدواء: "${query}". أرجع JSON بالشكل: {"generics": ["مثيل 1"], "substitutes": ["بديل 1"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        container.innerHTML = `
-          <div class="result-box">
-            <p style="margin-bottom:4px;"><strong>🧪 المثائل (نفس المادة الفعالة):</strong></p>
-            <p style="color:#047857; font-weight:800; background:#ecfdf5; padding:8px 12px; border-radius:8px;">${resJson.generics.join(' - ')}</p>
-            <hr style="margin:12px 0; border:0; border-top:1px solid #e2e8f0;">
-            <p style="margin-bottom:4px;"><strong>🔄 البدائل (نفس التأثير):</strong></p>
-            <p style="color:#0f766e; font-weight:800; background:#f0fdf4; padding:8px 12px; border-radius:8px;">${resJson.substitutes.join(' - ')}</p>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-
-    async function askGeminiDerma() {
-      const query = document.getElementById('dermaSearchInput').value.trim();
-      if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
-      
-      const container = document.getElementById('aiResultsDerma');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وصياغة الروتين...</div>`;
-
-      try {
-        const prompt = `أنت طبيب جلدي. قم بتحليل المشكلة: "${query}". أرجع JSON بالتراكيب: {"diagnosisAndCause": "التشخيص", "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        container.innerHTML = `
-          <div class="result-box">
-            <p style="margin-bottom:8px;"><strong>🔬 التحليل الطبي:</strong> ${resJson.diagnosisAndCause}</p>
-            <div style="background:#f0f9ff; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #bae6fd;">
-              <p style="color:#0369a1;"><strong>☀️ الصباح:</strong> ${resJson.routine.morning.join(', ')}</p>
-            </div>
-            <div style="background:#f8fafc; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #e2e8f0;">
-              <p style="color:#334155;"><strong>🌙 المساء:</strong> ${resJson.routine.evening.join(', ')}</p>
-            </div>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-
-    async function askGeminiAlgorithm() {
-      const query = document.getElementById('algoSearchInput').value.trim();
-      if(!query) { alert("برجاء كتابة الحالة الطبية أولاً!"); return; }
-      
-      const container = document.getElementById('aiResultsAlgo');
-      container.innerHTML = `<div class="loading">⏳ جارِ رسم الخريطة الشجرية...</div>`;
-
-      try {
-        const prompt = `أنت طبيب استشاري. أنشئ خوارزمية للحالة: "${query}". أرجع JSON: {"conditionTitle": "الحالة", "initialAssessment": "التقييم", "branches": [{"decisionCriteria": "المعيار", "actionStep": "الإجراء"}], "redFlags": ["عرض خطير"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        let branchesText = resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('');
-
-        container.innerHTML = `
-          <div class="result-box">
-            <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
-            <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
-            <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}</div>
-            <p style="color:#b91c1c; margin-top:8px; background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;"><strong>⚠️ علامات الخطر (Red Flags):</strong> ${resJson.redFlags.join(', ')}</p>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-  </script>
-</body>
-</html>
+          <div class="result-box" style="border-right: 4px solid #0369a1;">
+            <h3 style="font-size:14px; color:#0369a1; font-weight:800;">توصية Gemini للدواء: ${drugName} <span class="badge">AI Verification</span></h3>
+            <p style="margin-top:6px;"><strong>📌 الجرعة الموصى بها:</strong> ${resJson.recommendedDose}</p>
+            <p style="margin-top:4px;"><strong>⏰ طريقة التقسيم:</strong> ${resJson.instructions}</p>
+            <p style="margin-top:4px;"><strong>⚠️ الجرعة القصوى:</strong> ${resJson.maxDose}</p>
+            <p style="margin-top:6px; color:#991b1b; background:#fef2f2; padding:6px; border-radius:6px;"><strong>💡 ملاحظات:</stron
