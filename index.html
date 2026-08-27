@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -390,25 +389,83 @@
       if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDerma');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وصياغة الروتين...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة واستخراج المنتجات من السوق المصري...</div>`;
 
       try {
-        const prompt = `أنت طبيب جلدي. قم بتحليل المشكلة: "${query}". أرجع JSON بالتراكيب: {"diagnosisAndCause": "التشخيص", "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
+        const prompt = `أنت طبيب جلدي وصيدلي خبير بالسوق الصيدلاني المصري. قم بتحليل المشكلة: "${query}".
+أنشئ روتين علاجي مقسم لخطوات أو أنواع منتجات مطلوبة (مثل: غسول، مرطب، سيروم، إلخ).
+لكل نوع منتج في الروتين، رشح بالضبط 3 منتجات متوفرة صيدلانياً في السوق المصري مقسمة إلى:
+1. فئة ممتازة (High-End / المستورد أو المحلي الفاخر)
+2. فئة متوسطة (Mid-Range)
+3. فئة اقتصادية (Budget)
+
+أرجع البيانات فقط في صيغة JSON بالتركيب التالي حصراً وبدون أي نصوص إضافية:
+{
+  "diagnosisAndCause": "التشخيص الطبي المختصر للمشكلة",
+  "productCategories": [
+    {
+      "categoryName": "اسم نوع المنتج (مثلاً: غسول للبشرة / مرطب)",
+      "products": [
+        {
+          "tier": "فئة ممتازة",
+          "name": "اسم المنتج الصيدلاني في مصر",
+          "activeIngredients": ["المادة الفعالة 1", "المادة الفعالة 2"]
+        },
+        {
+          "tier": "فئة متوسطة",
+          "name": "اسم المنتج الصيدلاني في مصر",
+          "activeIngredients": ["المادة الفعالة 1", "المادة الفعالة 2"]
+        },
+        {
+          "tier": "فئة اقتصادية",
+          "name": "اسم المنتج الصيدلاني في مصر",
+          "activeIngredients": ["المادة الفعالة 1", "المادة الفعالة 2"]
+        }
+      ]
+    }
+  ]
+}`;
+
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
-        const morning = Array.isArray(resJson.routine?.morning) ? resJson.routine.morning.join(', ') : resJson.routine?.morning;
-        const evening = Array.isArray(resJson.routine?.evening) ? resJson.routine.evening.join(', ') : resJson.routine?.evening;
+        let categoriesHTML = '';
+        if (Array.isArray(resJson.productCategories)) {
+          resJson.productCategories.forEach(cat => {
+            let productsHTML = '';
+            if (Array.isArray(cat.products)) {
+              cat.products.forEach(p => {
+                let ingredients = Array.isArray(p.activeIngredients) ? p.activeIngredients.join(', ') : p.activeIngredients;
+                
+                let tierBg = '#f1f5f9';
+                let tierColor = '#475569';
+                if(p.tier.includes('ممتازة')) { tierBg = '#fef3c7'; tierColor = '#92400e'; }
+                else if(p.tier.includes('متوسطة')) { tierBg = '#e0f2fe'; tierColor = '#075985'; }
+                else if(p.tier.includes('اقتصادية')) { tierBg = '#dcfce7'; tierColor = '#166534'; }
+
+                productsHTML += `
+                  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-weight: 800; font-size: 13px; color: #0f172a;">🛍️ ${p.name || 'اسم المنتج'}</span>
+                      <span style="background: ${tierBg}; color: ${tierColor}; font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 800;">${p.tier}</span>
+                    </div>
+                    <p style="font-size: 12px; color: #475569; margin: 0;"><strong>🧪 المواد الفعالة:</strong> ${ingredients || 'غير محددة'}</p>
+                  </div>`;
+              });
+            }
+
+            categoriesHTML += `
+              <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-top: 14px;">
+                <h4 style="font-size: 14px; color: #0369a1; font-weight: 800; margin-bottom: 4px; border-bottom: 1.5px solid #bae6fd; padding-bottom: 6px;">📌 ${cat.categoryName}</h4>
+                ${productsHTML}
+              </div>`;
+          });
+        }
 
         container.innerHTML = `
           <div class="result-box">
-            <p style="margin-bottom:8px;"><strong>🔬 التحليل الطبي:</strong> ${resJson.diagnosisAndCause}</p>
-            <div style="background:#f0f9ff; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #bae6fd;">
-              <p style="color:#0369a1;"><strong>☀️ الصباح:</strong> ${morning}</p>
-            </div>
-            <div style="background:#f8fafc; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #e2e8f0;">
-              <p style="color:#334155;"><strong>🌙 المساء:</strong> ${evening}</p>
-            </div>
+            <p style="margin-bottom:10px; font-size:13px; background: #f0f9ff; padding: 10px 14px; border-radius: 10px; border: 1px solid #bae6fd;"><strong>🔬 التشخيص الطبي:</strong> ${resJson.diagnosisAndCause}</p>
+            ${categoriesHTML}
           </div>`;
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
@@ -421,25 +478,4 @@
       container.innerHTML = `<div class="loading">⏳ جارِ رسم الخريطة الشجرية...</div>`;
 
       try {
-        const prompt = `أنت طبيب استشاري. أنشئ خوارزمية للحالة: "${query}". أرجع JSON: {"conditionTitle": "الحالة", "initialAssessment": "التقييم", "branches": [{"decisionCriteria": "المعيار", "actionStep": "الإجراء"}], "redFlags": ["عرض خطير"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        let branchesText = Array.isArray(resJson.branches) 
-          ? resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('')
-          : resJson.branches;
-
-        const redFlags = Array.isArray(resJson.redFlags) ? resJson.redFlags.join(', ') : resJson.redFlags;
-
-        container.innerHTML = `
-          <div class="result-box">
-            <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
-            <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
-            <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}</div>
-            <p style="color:#b91c1c; margin-top:8px; background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;"><strong>⚠️ علامات الخطر (Red Flags):</strong> ${redFlags}</p>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-  </script>
-</body>
-</html>
+        const prompt = `أنت طبيب استشاري. أنشئ خوارزمية للحالة: "${query}". أرجع JSON: {"conditionTitle": "الحالة", "initialAssessment": "التقييم", "branches": [{"decisionCriteri
