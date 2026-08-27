@@ -3,204 +3,266 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الطبية والصيدلانية الذكية</title>
+  <title>لوحة التحكم الطبية والصيدلانية</title>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --primary-light: #ccfbf1;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.08);
+    }
+
     * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background-color: #f1f5f9; color: #0f172a; padding-bottom: 48px; }
+    body { background-color: var(--bg-main); color: var(--text-main); padding-bottom: 40px; }
 
     /* Header */
-    header { background-color: #134e4a; color: white; padding: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); position: sticky; top: 0; z-index: 50; }
-    .header-container { max-width: 896px; margin: 0 auto; display: flex; flex-direction: column; justify-content: space-between; align-items: center; gap: 8px; }
-    @media (min-width: 640px) { .header-container { flex-direction: row; } }
-    .header-title-box { display: flex; align-items: center; gap: 12px; }
-    .header-title { font-size: 18px; font-weight: 900; display: flex; align-items: center; gap: 8px; }
-    .header-subtitle { font-size: 11px; color: #99f6e4; margin-top: 2px; }
-    .badge-v { background-color: #115e59; border: 1px solid #0f766e; color: #99f6e4; font-size: 12px; padding: 4px 12px; border-radius: 9999px; font-weight: 700; }
-
-    .main-container { max-width: 896px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
-
-    /* Cards & Boxes */
-    .card { background-color: white; padding: 16px; border-radius: 16px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 12px; }
-    .card-title { font-size: 14px; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 8px; }
-
-    /* API Key Box */
-    .api-box { background-color: #fffbeb; border: 1px solid #fef08a; padding: 14px; border-radius: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px; }
-    .api-title { font-weight: 700; color: #78350f; }
-
-    /* Grid Layout */
-    .grid-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (min-width: 768px) { .grid-cards { grid-template-columns: repeat(4, 1fr); } }
-
-    /* Dashboard Navigation Cards */
-    .nav-card {
-      background-color: #f8fafc; border-radius: 12px; padding: 12px; cursor: pointer; height: 112px;
-      display: flex; flex-direction: column; align-items: center; justify-content: space-between; text-align: center;
-      transition: all 0.2s; border: 1px solid transparent; position: relative;
+    header { 
+      background: linear-gradient(135deg, #115e59 0%, #0f766e 100%); 
+      color: white; 
+      padding: 16px 20px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 100; 
+      box-shadow: 0 4px 20px rgba(15, 118, 110, 0.25);
     }
-    .nav-card:active { transform: scale(0.97); }
-    .nav-card.drug { border-color: rgba(20, 184, 166, 0.3); } .nav-card.drug:hover { border-color: #0d9488; }
-    .nav-card.alt { border-color: rgba(16, 185, 129, 0.3); } .nav-card.alt:hover { border-color: #059669; }
-    .nav-card.derma { border-color: rgba(14, 165, 233, 0.3); } .nav-card.derma:hover { border-color: #0284c7; }
-    .nav-card.algo { border-color: rgba(245, 158, 11, 0.3); } .nav-card.algo:hover { border-color: #d97706; }
+    .header-content { max-width: 800px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    header p { font-size: 11px; color: var(--primary-light); font-weight: 600; margin-top: 2px; }
 
-    .nav-card-icon { font-size: 24px; margin: auto 0; }
-    .nav-card-h3 { font-size: 12px; font-weight: 700; color: #1e293b; }
-    .nav-card-p { font-size: 10px; color: #64748b; font-weight: 600; }
+    .container { max-width: 800px; margin: 20px auto; padding: 0 16px; }
 
-    /* Form Controls */
-    .input-group { display: flex; gap: 8px; }
-    input[type="text"], input[type="password"], input[type="number"] {
-      width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 12px; outline: none; background: white;
+    /* Cards */
+    .card { 
+      background: var(--card-bg); 
+      border-radius: var(--radius-lg); 
+      padding: 20px; 
+      margin-bottom: 16px; 
+      border: 1px solid var(--border-color); 
+      box-shadow: var(--shadow-sm);
     }
-    input:focus { border-color: #0f766e; box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2); }
 
-    .btn { background-color: #115e59; color: white; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 12px; border: none; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
-    .btn:hover { background-color: #134e4a; }
-    .btn:active { transform: scale(0.96); }
+    /* Grid Setup */
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 14px; }
+    @media (min-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); } }
 
-    .btn-emerald { background-color: #047857; } .btn-emerald:hover { background-color: #065f46; }
-    .btn-sky { background-color: #0369a1; } .btn-sky:hover { background-color: #075985; }
-    .btn-amber { background-color: #b45309; } .btn-amber:hover { background-color: #92400e; }
-    .btn-back { background-color: #115e59; color: white; font-size: 12px; padding: 6px 12px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    /* Modern Dashboard Action Cards */
+    .btn-card { 
+      background: #ffffff; 
+      border: 1px solid var(--border-color); 
+      border-radius: var(--radius-md); 
+      padding: 18px 12px; 
+      text-align: center; 
+      cursor: pointer; 
+      transition: all 0.23s ease; 
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .btn-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+    .btn-card:active { transform: scale(0.96); }
 
-    /* Results Dynamic Styling */
-    .result-card { background-color: white; padding: 16px; border-radius: 16px; border: 1px solid #e2e8f0; font-size: 12px; line-height: 1.6; display: flex; flex-direction: column; gap: 12px; }
-    .loading-box { background-color: white; padding: 20px; border-radius: 16px; text-align: center; font-weight: 700; font-size: 12px; }
+    /* Dynamic Card Accent Colors */
+    .btn-card.drug { border-top: 4px solid #0f766e; }
+    .btn-card.alt { border-top: 4px solid #047857; }
+    .btn-card.derma { border-top: 4px solid #0369a1; }
+    .btn-card.algo { border-top: 4px solid #b45309; }
+
+    .btn-card .icon { font-size: 28px; margin-bottom: 8px; display: block; }
+    .btn-card .title { font-size: 13px; font-weight: 800; color: var(--text-main); display: block; }
+
+    /* Form Controls & Inputs */
+    .input-group { display: flex; gap: 10px; margin-top: 12px; }
+    input[type="text"], input[type="password"], input[type="number"] { 
+      flex: 1; 
+      padding: 12px 14px; 
+      border: 1.5px solid #cbd5e1; 
+      border-radius: var(--radius-md); 
+      font-size: 13px; 
+      outline: none; 
+      background: #ffffff;
+      transition: all 0.2s;
+    }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15); }
+
+    button.action-btn { 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      padding: 12px 20px; 
+      border-radius: var(--radius-md); 
+      font-size: 13px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      white-space: nowrap; 
+      transition: all 0.2s;
+      box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);
+    }
+    button.action-btn:hover { background: var(--primary-dark); }
+    button.action-btn:active { transform: scale(0.96); }
+
+    .back-btn { 
+      background: #ffffff; 
+      color: var(--text-main); 
+      border: 1px solid var(--border-color); 
+      padding: 8px 16px; 
+      border-radius: 20px; 
+      font-size: 12px; 
+      font-weight: 700;
+      cursor: pointer; 
+      margin-bottom: 14px; 
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+    }
+    .back-btn:active { transform: scale(0.95); background: #f1f5f9; }
+
+    /* Elegant Result Containers */
+    .result-box { 
+      background: #ffffff; 
+      border-radius: var(--radius-lg); 
+      padding: 18px; 
+      border: 1px solid var(--border-color); 
+      margin-top: 14px; 
+      font-size: 13px; 
+      line-height: 1.7; 
+      box-shadow: var(--shadow-sm);
+    }
+    .result-box h3 { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+    .badge { 
+      background: var(--primary-light); 
+      color: var(--primary-dark); 
+      font-size: 10px; 
+      padding: 3px 10px; 
+      border-radius: 20px; 
+      font-weight: 800; 
+    }
+
+    .loading { 
+      text-align: center; 
+      color: var(--primary); 
+      font-weight: 700; 
+      padding: 20px; 
+      font-size: 13px; 
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      border: 1px dashed var(--border-color);
+      margin-top: 14px;
+    }
 
     .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <header>
-    <div class="header-container">
-      <div class="header-title-box">
-        <button id="backBtn" onclick="showDashboard()" class="btn-back hidden">
-          <span>➡️</span> العودة للرئيسية
-        </button>
-        <div>
-          <h1 id="headerTitle" class="header-title">
-            <span>🩺</span> لوحة التحكم الطبية والصيدلانية
-          </h1>
-          <p class="header-subtitle">منصة الدعم السريري والتجميلي بذكاء Gemini AI</p>
-        </div>
+    <div class="header-content">
+      <div>
+        <h1>🩺 لوحة التحكم الطبية والصيدلانية</h1>
+        <p>منصة الدعم السريري والتجميلي السريعة</p>
       </div>
-      <span class="badge-v">النسخة المستقرة v3.0 🚀</span>
+      <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff;">v2.0 Pro</span>
     </div>
   </header>
 
-  <div class="main-container">
+  <div class="container">
 
     <!-- API Key Section -->
-    <div id="apiKeySection" class="api-box">
-      <span class="api-title">⚠️ إعدادات الربط بـ Gemini (مطلوبة مرة واحدة):</span>
+    <div id="apiKeySection" class="card" style="background-color: #fffbeb; border-color: #fef08a;">
+      <span style="font-size: 12px; font-weight: bold; color: #854d0e;">⚠️ إعداد مفتاح Gemini API (مطلوب مرة واحدة):</span>
       <div class="input-group">
-        <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." />
-        <button onclick="saveApiKey()" class="btn btn-amber">حفظ المفتاح</button>
+        <input type="password" id="apiKeyInput" placeholder="الصق المفتاح هنا..." />
+        <button class="action-btn" style="background-color: #a16207;" onclick="saveApiKey()">حفظ المفتاح</button>
       </div>
     </div>
 
     <!-- MAIN DASHBOARD PAGE -->
-    <div id="pageDashboard" style="display: flex; flex-direction: column; gap: 16px;">
+    <div id="pageDashboard">
       <div class="card">
-        <h2 class="card-title">التنقل في لوحة التحكم الرئيسية</h2>
-        
-        <div class="grid-cards">
-          
-          <div onclick="openPage('pageDrug')" class="nav-card drug">
-            <div style="width:100%; text-align:left; color:#94a3b8; font-size:12px;">↗</div>
-            <div class="nav-card-icon">💊</div>
-            <div>
-              <h3 class="nav-card-h3">المساعد الدوائي</h3>
-              <p class="nav-card-p">(Drug Assistant)</p>
-            </div>
+        <h2 style="font-size: 14px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">الأقسام الرئيسية</h2>
+        <div class="grid">
+          <div class="btn-card drug" onclick="openPage('pageDrug')">
+            <span class="icon">💊</span>
+            <span class="title">المساعد الدوائي</span>
           </div>
-
-          <div onclick="openPage('pageAlt')" class="nav-card alt">
-            <div style="width:100%; text-align:left; color:#94a3b8; font-size:12px;">↗</div>
-            <div class="nav-card-icon">🔄</div>
-            <div>
-              <h3 class="nav-card-h3">المثائل والبدائل</h3>
-              <p class="nav-card-p">(Generics & Substitutes)</p>
-            </div>
+          <div class="btn-card alt" onclick="openPage('pageAlt')">
+            <span class="icon">🔄</span>
+            <span class="title">المثائل والبدائل</span>
           </div>
-
-          <div onclick="openPage('pageDerma')" class="nav-card derma">
-            <div style="width:100%; text-align:left; color:#94a3b8; font-size:12px;">↗</div>
-            <div class="nav-card-icon">✨</div>
-            <div>
-              <h3 class="nav-card-h3">الشعر والبشرة</h3>
-              <p class="nav-card-p">(Hair & Skin Care)</p>
-            </div>
+          <div class="btn-card derma" onclick="openPage('pageDerma')">
+            <span class="icon">✨</span>
+            <span class="title">الشعر والبشرة</span>
           </div>
-
-          <div onclick="openPage('pageAlgo')" class="nav-card algo">
-            <div style="width:100%; text-align:left; color:#94a3b8; font-size:12px;">↗</div>
-            <div class="nav-card-icon">🌿</div>
-            <div>
-              <h3 class="nav-card-h3">الخوارزميات الطبية</h3>
-              <p class="nav-card-p">(Medical Algorithms)</p>
-            </div>
+          <div class="btn-card algo" onclick="openPage('pageAlgo')">
+            <span class="icon">🌿</span>
+            <span class="title">الخوارزميات</span>
           </div>
-
-        </div>
-      </div>
-
-      <!-- Quick Search Section -->
-      <div class="card">
-        <h3 style="font-size: 12px; font-weight: 700; color: #334155;">بحث سريع في الخوارزميات والبروتوكولات:</h3>
-        <div class="input-group">
-          <input type="text" id="quickSearchInput" onkeyup="if(event.key === 'Enter') handleQuickSearch()" placeholder="مثال: Hypertension, Diabetes..." />
-          <button onclick="handleQuickSearch()" class="btn">🔍 بحث</button>
         </div>
       </div>
     </div>
 
     <!-- PAGE 1: DRUG ASSISTANT -->
-    <div id="pageDrug" class="page-content hidden" style="display: flex; flex-direction: column; gap: 16px;">
+    <div id="pageDrug" class="page-content hidden">
+      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 class="card-title" style="color: #134e4a;"><span>💊</span> قسم المساعد الدوائي والسؤال عن المنتج</h2>
+        <h2 style="font-size: 14px; font-weight: 800; color: #0f766e; margin-bottom: 4px;">💊 المساعد الدوائي</h2>
         <div class="input-group">
-          <input type="text" id="drugSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDrug()" placeholder="مثال: Augmentin 1gm، هل الآيبوبروفين آمن لمريض الضغط؟..." />
-          <button onclick="askGeminiDrug()" class="btn">استفسار / بحث 🔍</button>
+          <input type="text" id="drugSearchInput" placeholder="اكتب اسم الدواء أو السؤال الطبية..." />
+          <button class="action-btn" onclick="askGeminiDrug()">بحث</button>
         </div>
       </div>
       <div id="aiResultsDrug"></div>
     </div>
 
     <!-- PAGE 2: ALTERNATIVES -->
-    <div id="pageAlt" class="page-content hidden" style="display: flex; flex-direction: column; gap: 16px;">
+    <div id="pageAlt" class="page-content hidden">
+      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 class="card-title" style="color: #065f46;"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
+        <h2 style="font-size: 14px; font-weight: 800; color: #047857; margin-bottom: 4px;">🔄 المثائل والبدائل</h2>
         <div class="input-group">
-          <input type="text" id="altSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlternatives()" placeholder="مثال: Panadol, Congestal, Clexane..." />
-          <button onclick="askGeminiAlternatives()" class="btn btn-emerald">عرض المثائل والبدائل 🔄</button>
+          <input type="text" id="altSearchInput" placeholder="اسم الدواء..." />
+          <button class="action-btn" style="background-color: #047857;" onclick="askGeminiAlternatives()">عرض البدائل</button>
         </div>
       </div>
       <div id="aiResultsAlt"></div>
     </div>
 
     <!-- PAGE 3: DERMA -->
-    <div id="pageDerma" class="page-content hidden" style="display: flex; flex-direction: column; gap: 16px;">
+    <div id="pageDerma" class="page-content hidden">
+      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 class="card-title" style="color: #075985;"><span>✨</span> قسم العناية بالشعر والبشرة</h2>
+        <h2 style="font-size: 14px; font-weight: 800; color: #0369a1; margin-bottom: 4px;">✨ الشعر والبشرة</h2>
         <div class="input-group">
-          <input type="text" id="dermaSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDerma()" placeholder="مثال: تساقط شعر وراثي، حب شباب هرموني..." />
-          <button onclick="askGeminiDerma()" class="btn btn-sky">عرض الحل 💡</button>
+          <input type="text" id="dermaSearchInput" placeholder="وصف المشكلة الجلدية..." />
+          <button class="action-btn" style="background-color: #0369a1;" onclick="askGeminiDerma()">تحليل</button>
         </div>
       </div>
       <div id="aiResultsDerma"></div>
     </div>
 
     <!-- PAGE 4: ALGORITHMS -->
-    <div id="pageAlgo" class="page-content hidden" style="display: flex; flex-direction: column; gap: 16px;">
+    <div id="pageAlgo" class="page-content hidden">
+      <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
-        <h2 class="card-title" style="color: #78350f;"><span>🌿</span> قسم الخوارزميات والبروتوكولات الطبية</h2>
+        <h2 style="font-size: 14px; font-weight: 800; color: #b45309; margin-bottom: 4px;">🌿 الخوارزميات الطبية</h2>
         <div class="input-group">
-          <input type="text" id="algoSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlgorithm()" placeholder="مثال: Hypertension, Acute Asthma Exacerbation..." />
-          <button onclick="askGeminiAlgorithm()" class="btn btn-amber">رسم الخريطة 🗺️</button>
+          <input type="text" id="algoSearchInput" placeholder="اسم الحالة الطبية..." />
+          <button class="action-btn" style="background-color: #b45309;" onclick="askGeminiAlgorithm()">رسم الخريطة</button>
         </div>
       </div>
       <div id="aiResultsAlgo"></div>
@@ -209,8 +271,7 @@
   </div>
 
   <script>
-    let currentDrugForPediatric = "";
-
+    // التأكد التام من عمل النص البرمجي
     window.onload = function() {
       const savedKey = localStorage.getItem('gemini_api_key');
       if(savedKey) {
@@ -225,37 +286,27 @@
         localStorage.setItem('gemini_api_key', key);
         document.getElementById('apiKeySection').style.display = 'none';
         alert('تم حفظ المفتاح بنجاح! 🚀');
-      } else { alert('من فضلك أدخل مفتاح صحيح.'); }
+      } else { 
+        alert('من فضلك أدخل مفتاح صحيح.'); 
+      }
     }
 
     function openPage(pageId) {
       document.getElementById('pageDashboard').classList.add('hidden');
       document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
-      
       document.getElementById(pageId).classList.remove('hidden');
-      document.getElementById('backBtn').classList.remove('hidden');
     }
 
     function showDashboard() {
       document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
       document.getElementById('pageDashboard').classList.remove('hidden');
-      document.getElementById('backBtn').classList.add('hidden');
-    }
-
-    function handleQuickSearch() {
-      const val = document.getElementById('quickSearchInput').value.trim();
-      if(val) {
-        openPage('pageAlgo');
-        document.getElementById('algoSearchInput').value = val;
-        askGeminiAlgorithm();
-      }
     }
 
     function getApiKey() {
       const key = localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
       if(!key) {
-        alert('برجاء إدخال وحفظ Gemini API Key أولاً.');
-        document.getElementById('apiKeySection').style.display = 'flex';
+        alert('⚠️ برجاء إدخال وحفظ Gemini API Key أولاً.');
+        document.getElementById('apiKeySection').style.display = 'block';
         return null;
       }
       return key;
@@ -270,110 +321,112 @@
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: promptText }] }]
+        })
       });
 
       const data = await response.json();
       if (data.error) throw new Error(data.error.message || 'خطأ في API');
-      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيح.');
+      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة.');
 
-      let rawText = data.candidates[0].content.parts[0].text.trim();
-      const firstBrace = rawText.indexOf('{');
-      const lastBrace = rawText.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace !== -1) {
-        rawText = rawText.substring(firstBrace, lastBrace + 1);
-      }
-      return JSON.parse(rawText);
+      let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
+      return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
     }
 
     async function askGeminiDrug() {
       const query = document.getElementById('drugSearchInput').value.trim();
+      if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
+      
       const container = document.getElementById('aiResultsDrug');
-      if(!query) return;
-
-      container.innerHTML = `<div class="loading-box" style="color:#0d9488;">⏳ جارِ تحليل السؤال/المنتج بـ Gemini AI...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال بـ Gemini...</div>`;
 
       try {
-        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج/الاستفسار", "activeIngredients": ["المادة الفعالة 1"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "طريقة الاستخدام والجرعة الأساسية"}`;
+        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
         const resJson = await fetchGemini(prompt);
-        currentDrugForPediatric = resJson.name;
-
-        let ingredientsHtml = resJson.activeIngredients.map(item => `<li style="display:flex; align-items:center; gap:6px; color:#1e293b;"><span style="width:6px; height:6px; border-radius:50%; background:#0d9488;"></span><span>${item}</span></li>`).join('');
+        if(!resJson) return;
 
         container.innerHTML = `
-          <div class="result-card">
-            <div style="border-bottom:1px solid #f1f5f9; padding-bottom:8px; display:flex; justify-between; align-items:center;">
-              <h3 style="font-size:16px; font-weight:800; color:#134e4a;">${resJson.name}</h3>
-              <span style="background:#ccfbf1; color:#0f766e; font-size:10px; padding:2px 8px; border-radius:12px; font-weight:800;">Gemini AI</span>
-            </div>
-            <div style="background:#f0fdf4; padding:10px; border-radius:12px; border:1px solid #dcfce7;">
-              <p style="font-weight:700; color:#166534; margin-bottom:4px;">🧪 المكونات الأساسية:</p>
-              <ul style="list-style:none;">${ingredientsHtml}</ul>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <div style="background:#f8fafc; padding:10px; border-radius:12px; border:1px solid #f1f5f9;"><p style="font-weight:700; color:#0f766e; margin-bottom:2px;">🎯 الإجابة / دواعي الاستعمال:</p><p>${resJson.indications}</p></div>
-              <div style="background:#f8fafc; padding:10px; border-radius:12px; border:1px solid #f1f5f9;"><p style="font-weight:700; color:#0f766e; margin-bottom:2px;">💊 الجرعة والاستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
-            </div>
-
-            <div style="background:#f0f9ff; padding:12px; border-radius:12px; border:1px solid #bae6fd; margin-top:8px;">
-              <p style="font-weight:700; color:#0369a1; margin-bottom:6px;">👶 حاسبة جرعة الأطفال بالوزن (Pediatric Dose Calculator):</p>
-              <div class="input-group">
-                <input type="number" id="pediaWeightInput" placeholder="أدخل وزن الطفل (كجم)..." />
-                <button onclick="calculatePediatricDose()" class="btn btn-sky">حساب الجرعة 🧮</button>
-              </div>
-              <div id="pediatricResult" class="hidden" style="margin-top:8px; padding:8px; background:white; border-radius:8px; border:1px solid #bae6fd; font-weight:700; color:#0369a1;"></div>
-            </div>
+          <div class="result-box">
+            <h3 style="font-size:15px; color:#0f766e; font-weight:800;">${resJson.name} <span class="badge">Gemini AI</span></h3>
+            <p style="margin-top:8px;"><strong>🧪 المكونات:</strong> ${resJson.activeIngredients.join(', ')}</p>
+            <p style="margin-top:6px;"><strong>🎯 دواعي الاستعمال:</strong> ${resJson.indications}</p>
+            <p style="margin-top:6px;"><strong>💊 الجرعة:</strong> ${resJson.dosageAndUsage}</p>
           </div>`;
-      } catch (err) { container.innerHTML = `<div class="loading-box" style="color:#dc2626;">❌ حدث خطأ: ${err.message}</div>`; }
-    }
-
-    async function calculatePediatricDose() {
-      const weight = document.getElementById('pediaWeightInput').value.trim();
-      const resContainer = document.getElementById('pediatricResult');
-
-      if (!weight || weight <= 0) { alert("برجاء إدخال وزن صحيح بالكيوجرام."); return; }
-
-      resContainer.classList.remove('hidden');
-      resContainer.innerHTML = `⏳ جارِ حساب الجرعة الدقيقة لوزن ${weight} كجم...`;
-
-      try {
-        const prompt = `أنت صيدلي خبير. احسب الجرعة الدقيقة للأطفال بالوزن للدواء التالي: "${currentDrugForPediatric}" لطفل وزنه: ${weight} كجم. أرجع JSON فقط بالصيغة: {"dose": "مقدار الجرعة بالـ ml أو mg وعدد المرات يومياً باختصار شديد"}`;
-        const resJson = await fetchGemini(prompt);
-        resContainer.innerHTML = `✅ <strong>الجرعة المقترحة لوزن (${weight} كجم):</strong> ${resJson.dose}`;
-      } catch (err) { resContainer.innerHTML = `❌ حدث خطأ أثناء حساب الجرعة.`; }
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
 
     async function askGeminiAlternatives() {
       const query = document.getElementById('altSearchInput').value.trim();
+      if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
+      
       const container = document.getElementById('aiResultsAlt');
-      if(!query) return;
-
-      container.innerHTML = `<div class="loading-box" style="color:#059669;">⏳ جارِ استخراج المثائل والبدائل المتاحة بـ Gemini AI...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ استخراج البدائل...</div>`;
 
       try {
-        const prompt = `أنت صيدلي خبير بالسوق المصري. اخرج المثائل المتاحة (Generics: نفس المادة الفعالة) والبدائل المتاحة (Substitutes: بديل له نفس التأثير) للدواء التالي: "${query}". أرجع JSON بالشكل التالي فقط: {"generics": ["مثيل 1"], "substitutes": ["بديل 1"]}`;
+        const prompt = `أنت صيدلي خبير بالسوق المصري. استخرج المثائل والبدائل للدواء: "${query}". أرجع JSON بالشكل: {"generics": ["مثيل 1"], "substitutes": ["بديل 1"]}`;
         const resJson = await fetchGemini(prompt);
-
-        let genHtml = resJson.generics.map(item => `<div style="padding:6px 10px; background:#ecfdf5; border-radius:8px; color:#065f46; font-weight:700;">• ${item}</div>`).join('');
-        let subHtml = resJson.substitutes.map(item => `<div style="padding:6px 10px; background:#f0fdf4; border-radius:8px; color:#166534; font-weight:700;">• ${item}</div>`).join('');
+        if(!resJson) return;
 
         container.innerHTML = `
-          <div class="result-card">
-            <div>
-              <h3 style="font-weight:800; color:#065f46; margin-bottom:8px;">🧪 المثائل المتاحة (Generics - نفس المادة الفعالة):</h3>
-              <div style="display:grid; grid-template-columns:1fr; gap:6px;">${genHtml}</div>
-            </div>
-            <div style="border-t:1px solid #f1f5f9; padding-top:10px;">
-              <h3 style="font-weight:800; color:#166534; margin-bottom:8px;">🔄 البدائل المتاحة (Substitutes - نفس المجموعة/التأثير):</h3>
-              <div style="display:grid; grid-template-columns:1fr; gap:6px;">${subHtml}</div>
-            </div>
+          <div class="result-box">
+            <p style="margin-bottom:4px;"><strong>🧪 المثائل (نفس المادة الفعالة):</strong></p>
+            <p style="color:#047857; font-weight:800; background:#ecfdf5; padding:8px 12px; border-radius:8px;">${resJson.generics.join(' - ')}</p>
+            <hr style="margin:12px 0; border:0; border-top:1px solid #e2e8f0;">
+            <p style="margin-bottom:4px;"><strong>🔄 البدائل (نفس التأثير):</strong></p>
+            <p style="color:#0f766e; font-weight:800; background:#f0fdf4; padding:8px 12px; border-radius:8px;">${resJson.substitutes.join(' - ')}</p>
           </div>`;
-      } catch (err) { container.innerHTML = `<div class="loading-box" style="color:#dc2626;">❌ حدث خطأ: ${err.message}</div>`; }
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
 
     async function askGeminiDerma() {
       const query = document.getElementById('dermaSearchInput').value.trim();
+      if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
+      
       const container = document.getElementById('aiResultsDerma');
-      if(!query) return;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وصياغة الروتين...</div>`;
 
-      container.innerHTML = `<div class="loading-bo
+      try {
+        const prompt = `أنت طبيب جلدي. قم بتحليل المشكلة: "${query}". أرجع JSON بالتراكيب: {"diagnosisAndCause": "التشخيص", "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
+        const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
+
+        container.innerHTML = `
+          <div class="result-box">
+            <p style="margin-bottom:8px;"><strong>🔬 التحليل الطبي:</strong> ${resJson.diagnosisAndCause}</p>
+            <div style="background:#f0f9ff; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #bae6fd;">
+              <p style="color:#0369a1;"><strong>☀️ الصباح:</strong> ${resJson.routine.morning.join(', ')}</p>
+            </div>
+            <div style="background:#f8fafc; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #e2e8f0;">
+              <p style="color:#334155;"><strong>🌙 المساء:</strong> ${resJson.routine.evening.join(', ')}</p>
+            </div>
+          </div>`;
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
+    }
+
+    async function askGeminiAlgorithm() {
+      const query = document.getElementById('algoSearchInput').value.trim();
+      if(!query) { alert("برجاء كتابة الحالة الطبية أولاً!"); return; }
+      
+      const container = document.getElementById('aiResultsAlgo');
+      container.innerHTML = `<div class="loading">⏳ جارِ رسم الخريطة الشجرية...</div>`;
+
+      try {
+        const prompt = `أنت طبيب استشاري. أنشئ خوارزمية للحالة: "${query}". أرجع JSON: {"conditionTitle": "الحالة", "initialAssessment": "التقييم", "branches": [{"decisionCriteria": "المعيار", "actionStep": "الإجراء"}], "redFlags": ["عرض خطير"]}`;
+        const resJson = await fetchGemini(prompt);
+        if(!resJson) return;
+
+        let branchesText = resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('');
+
+        container.innerHTML = `
+          <div class="result-box">
+            <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
+            <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
+            <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}</div>
+            <p style="color:#b91c1c; margin-top:8px; background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;"><strong>⚠️ علامات الخطر (Red Flags):</strong> ${resJson.redFlags.join(', ')}</p>
+          </div>`;
+      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
+    }
+  </script>
+</body>
+</html>
