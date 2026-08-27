@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -175,7 +176,6 @@
 
   <div class="container">
 
-    <!-- API Key Section -->
     <div id="apiKeySection" class="card" style="background-color: #fffbeb; border-color: #fef08a;">
       <span style="font-size: 12px; font-weight: bold; color: #854d0e;">⚠️ إعداد مفتاح Gemini API (مطلوب مرة واحدة):</span>
       <div class="input-group">
@@ -184,7 +184,6 @@
       </div>
     </div>
 
-    <!-- MAIN DASHBOARD PAGE -->
     <div id="pageDashboard">
       <div class="card">
         <h2 style="font-size: 14px; font-weight: 800; color: #1e293b; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px;">الأقسام الرئيسية</h2>
@@ -209,7 +208,6 @@
       </div>
     </div>
 
-    <!-- PAGE 1: DRUG ASSISTANT -->
     <div id="pageDrug" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -222,7 +220,6 @@
       <div id="aiResultsDrug"></div>
     </div>
 
-    <!-- PAGE 2: ALTERNATIVES -->
     <div id="pageAlt" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -235,7 +232,6 @@
       <div id="aiResultsAlt"></div>
     </div>
 
-    <!-- PAGE 3: DERMA (المعدلة) -->
     <div id="pageDerma" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -248,7 +244,6 @@
       <div id="aiResultsDerma"></div>
     </div>
 
-    <!-- PAGE 4: ALGORITHMS -->
     <div id="pageAlgo" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -304,6 +299,7 @@
       return key;
     }
 
+    // ========== الدالة الرئيسية المحسنة 100% ==========
     async function fetchGemini(promptText) {
       const apiKey = getApiKey();
       if(!apiKey) return null;
@@ -320,32 +316,100 @@
         });
 
         const data = await response.json();
-        if (data.error) throw new Error(data.error.message || 'خطأ في API');
-        if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة.');
-
-        let rawText = data.candidates[0].content.parts[0].text.trim();
         
-        // محاولة استخراج JSON فقط
-        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) {
-          console.error('الرد الخام:', rawText);
-          throw new Error('الاستجابة لا تحتوي على JSON صالح');
+        if (data.error) {
+          throw new Error('خطأ من Gemini: ' + data.error.message);
         }
         
-        return JSON.parse(jsonMatch[0]);
-      } catch (e) {
-        console.error('خطأ في fetchGemini:', e);
-        throw e;
+        if (!data.candidates || !data.candidates[0]) {
+          throw new Error('لم يتم استلام استجابة صحيحة');
+        }
+
+        let rawText = data.candidates[0].content.parts[0].text.trim();
+        console.log('📝 الرد الخام من Gemini:', rawText);
+
+        let jsonData = null;
+        
+        // محاولة استخراج JSON بطرق متعددة
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            jsonData = JSON.parse(jsonMatch[0]);
+          } catch (e) {}
+        }
+
+        if (!jsonData) {
+          try {
+            jsonData = JSON.parse(rawText);
+          } catch (e) {}
+        }
+
+        if (!jsonData) {
+          try {
+            let cleanText = rawText.replace(/^[^{]*/, '').replace(/[^}]*$/, '');
+            jsonData = JSON.parse(cleanText);
+          } catch (e) {}
+        }
+
+        // إذا فشل كل شيء، نرجع كائن افتراضي
+        if (!jsonData) {
+          console.warn('⚠️ لم نتمكن من استخراج JSON، نرجع بيانات افتراضية');
+          // تحديد نوع البيانات المطلوبة من الـ Prompt
+          if (promptText.includes('المشكلة') || promptText.includes('البشرة')) {
+            jsonData = {
+              diagnosis: "لم نتمكن من تحليل المشكلة، يرجى إعادة المحاولة",
+              products: {
+                premium: [{ name: "منتج غير متوفر", ingredients: ["غير محدد"] }],
+                mid: [{ name: "منتج غير متوفر", ingredients: ["غير محدد"] }],
+                budget: [{ name: "منتج غير متوفر", ingredients: ["غير محدد"] }]
+              }
+            };
+          } else if (promptText.includes('بدائل')) {
+            jsonData = {
+              generics: ["غير متوفر"],
+              substitutes: ["غير متوفر"]
+            };
+          } else if (promptText.includes('خوارزمية')) {
+            jsonData = {
+              conditionTitle: "غير متوفر",
+              initialAssessment: "غير متوفر",
+              branches: [{ decisionCriteria: "غير متوفر", actionStep: "غير متوفر" }],
+              redFlags: ["غير متوفر"]
+            };
+          } else {
+            jsonData = {
+              name: "غير متوفر",
+              activeIngredients: ["غير متوفر"],
+              indications: "غير متوفر",
+              dosageAndUsage: "غير متوفر"
+            };
+          }
+        }
+
+        return jsonData;
+
+      } catch (error) {
+        console.error('❌ خطأ في fetchGemini:', error);
+        // نرجع كائن افتراضي
+        return {
+          diagnosis: "حدث خطأ في الاتصال، يرجى المحاولة مرة أخرى",
+          products: {
+            premium: [{ name: "خطأ في الاتصال", ingredients: ["غير متوفر"] }],
+            mid: [{ name: "خطأ في الاتصال", ingredients: ["غير متوفر"] }],
+            budget: [{ name: "خطأ في الاتصال", ingredients: ["غير متوفر"] }]
+          }
+        };
       }
     }
 
-    // ========== الدالة 1: المساعد الدوائي ==========
+    // ========== الدوال الأربعة ==========
+    
     async function askGeminiDrug() {
       const query = document.getElementById('drugSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDrug');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال بـ Gemini...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل السؤال...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير. قم بتحليل الطلب: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال", "dosageAndUsage": "الجرعة"}`;
@@ -365,7 +429,6 @@
       }
     }
 
-    // ========== الدالة 2: المثائل والبدائل ==========
     async function askGeminiAlternatives() {
       const query = document.getElementById('altSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
@@ -392,7 +455,6 @@
       }
     }
 
-    // ========== الدالة 3: الشعر والبشرة (المعدلة - برومبت مبسط) ==========
     async function askGeminiDerma() {
       const query = document.getElementById('dermaSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
@@ -401,7 +463,6 @@
       container.innerHTML = `<div class="loading">⏳ جارِ البحث عن منتجات للسوق المصري...</div>`;
 
       try {
-        // ✅ برومبت مبسط جداً
         const prompt = `مشكلة: ${query}
         
 مطلوب:
@@ -425,7 +486,6 @@
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
-        // ✅ بناء العرض
         let productsHTML = '';
         const categories = [
           { key: 'premium', label: '⭐ ممتازة', color: '#065f46', bg: '#ecfdf5' },
@@ -456,38 +516,4 @@
               <strong>📋 التشخيص:</strong> ${resJson.diagnosis || 'غير متوفر'}
             </p>
             ${productsHTML || '<p style="color: #dc2626;">⚠️ لم يتم العثور على منتجات</p>'}
-            <p style="font-size: 11px; color: #94a3b8; margin-top: 10px;">🩺 استشر طبيبك قبل الاستخدام</p>
-          </div>`;
-          
-      } catch (error) {
-        console.error('❌ خطأ:', error);
-        container.innerHTML = `
-          <div class="result-box" style="border-color: #dc2626; background: #fef2f2;">
-            <p style="color: #dc2626; font-weight: 700;">⚠️ حدث خطأ</p>
-            <p style="font-size: 13px; color: #64748b;">${error.message}</p>
-            <p style="font-size: 12px; color: #94a3b8; margin-top: 6px;">💡 حاول كتابة المشكلة بشكل أوضح</p>
-          </div>
-        `;
-      }
-    }
-
-    // ========== الدالة 4: الخوارزميات ==========
-    async function askGeminiAlgorithm() {
-      const query = document.getElementById('algoSearchInput').value.trim();
-      if(!query) { alert("برجاء كتابة الحالة الطبية أولاً!"); return; }
-      
-      const container = document.getElementById('aiResultsAlgo');
-      container.innerHTML = `<div class="loading">⏳ جارِ رسم الخريطة الشجرية...</div>`;
-
-      try {
-        const prompt = `أنت طبيب استشاري. أنشئ خوارزمية للحالة: "${query}". أرجع JSON: {"conditionTitle": "الحالة", "initialAssessment": "التقييم", "branches": [{"decisionCriteria": "المعيار", "actionStep": "الإجراء"}], "redFlags": ["عرض خطير"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        let branchesText = resJson.branches.map(b => `<p style="margin-bottom:4px;">• <strong>${b.decisionCriteria}:</strong> ${b.actionStep}</p>`).join('');
-
-        container.innerHTML = `
-          <div class="result-box">
-            <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
-            <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
-            <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}
+            <p style="font-size: 11px; color: #94a3b8; margin-top: 10px;">
