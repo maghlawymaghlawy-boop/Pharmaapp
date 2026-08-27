@@ -242,7 +242,7 @@
       <div id="aiResultsAlt"></div>
     </div>
 
-    <!-- PAGE 3: DERMA -->
+    <!-- PAGE 3: DERMA (المعدلة) -->
     <div id="pageDerma" class="page-content hidden">
       <button class="back-btn" onclick="showDashboard()">➡️ العودة للرئيسية</button>
       <div class="card">
@@ -334,6 +334,7 @@
       return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
     }
 
+    // ========== الدالة رقم 1: المساعد الدوائي (لم تتغير) ==========
     async function askGeminiDrug() {
       const query = document.getElementById('drugSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
@@ -356,6 +357,7 @@
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
 
+    // ========== الدالة رقم 2: المثائل والبدائل (لم تتغير) ==========
     async function askGeminiAlternatives() {
       const query = document.getElementById('altSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة اسم الدواء أولاً!"); return; }
@@ -379,31 +381,80 @@
       } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
     }
 
+    // ========== الدالة رقم 3: الشعر والبشرة (المعدلة) ==========
     async function askGeminiDerma() {
       const query = document.getElementById('dermaSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة المشكلة أولاً!"); return; }
       
       const container = document.getElementById('aiResultsDerma');
-      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة وصياغة الروتين...</div>`;
+      container.innerHTML = `<div class="loading">⏳ جارِ تحليل الحالة والبحث عن منتجات السوق المصري...</div>`;
 
       try {
-        const prompt = `أنت طبيب جلدي. قم بتحليل المشكلة: "${query}". أرجع JSON بالتراكيب: {"diagnosisAndCause": "التشخيص", "routine": {"morning": ["خطوة 1"], "evening": ["خطوة 1"]}}`;
+        const prompt = `أنت طبيب جلدي وخبير بمنتجات السوق المصري (محلية ومستوردة). 
+حلل المشكلة التالية: "${query}"، وأرجع JSON بالهيكل التالي فقط:
+{
+  "diagnosisAndCause": "شرح مختصر للمشكلة وأسبابها",
+  "products": {
+    "premium": [
+      { "name": "اسم منتج فئة ممتازة", "activeIngredients": ["مادة فعالة 1", "مادة فعالة 2"] }
+    ],
+    "midRange": [
+      { "name": "اسم منتج فئة متوسطة", "activeIngredients": ["مادة فعالة 1", "مادة فعالة 2"] }
+    ],
+    "budget": [
+      { "name": "اسم منتج فئة اقتصادية", "activeIngredients": ["مادة فعالة 1", "مادة فعالة 2"] }
+    ]
+  }
+}
+ملاحظات: 
+- اذكر 3 منتجات على الأقل في كل فئة.
+- المنتجات يجب أن تكون متوفرة فعلاً في السوق المصري.
+- اكتب المواد الفعالة تحت كل منتج بدقة.`;
+
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
+        // بناء عرض المنتجات
+        let productsHTML = '';
+        const categories = [
+          { key: 'premium', label: '⭐ ممتازة (Premium)', color: '#065f46', bg: '#ecfdf5' },
+          { key: 'midRange', label: '🌟 متوسطة (Mid-Range)', color: '#0369a1', bg: '#f0f9ff' },
+          { key: 'budget', label: '💰 اقتصادية (Budget)', color: '#92400e', bg: '#fffbeb' }
+        ];
+
+        categories.forEach(cat => {
+          const items = resJson.products[cat.key];
+          if(items && items.length > 0) {
+            productsHTML += `<div style="margin-top: 12px; background: ${cat.bg}; padding: 12px; border-radius: 10px; border-right: 4px solid ${cat.color};">`;
+            productsHTML += `<p style="font-weight: 800; color: ${cat.color}; margin-bottom: 6px;">${cat.label}</p>`;
+            items.forEach(item => {
+              productsHTML += `<div style="background: white; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #e2e8f0;">`;
+              productsHTML += `<p style="font-weight: 700;">🧴 ${item.name}</p>`;
+              productsHTML += `<p style="font-size: 12px; color: #475569; margin-top: 4px;"><strong>🧪 المواد الفعالة:</strong> ${item.activeIngredients.join('، ')}</p>`;
+              productsHTML += `</div>`;
+            });
+            productsHTML += `</div>`;
+          }
+        });
+
         container.innerHTML = `
           <div class="result-box">
-            <p style="margin-bottom:8px;"><strong>🔬 التحليل الطبي:</strong> ${resJson.diagnosisAndCause}</p>
-            <div style="background:#f0f9ff; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #bae6fd;">
-              <p style="color:#0369a1;"><strong>☀️ الصباح:</strong> ${resJson.routine.morning.join(', ')}</p>
+            <h3 style="font-size:15px; color:#0369a1; font-weight:800; margin-bottom: 8px;">✨ تحليل المشكلة ومنتجات السوق المصري</h3>
+            <p style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 12px;">
+              <strong>🔬 التشخيص والأسباب:</strong> ${resJson.diagnosisAndCause}
+            </p>
+            <div style="margin-top: 8px;">
+              ${productsHTML || '<p style="color: #dc2626;">⚠️ لم يتم العثور على منتجات، حاول إعادة الصياغة.</p>'}
             </div>
-            <div style="background:#f8fafc; padding:10px 14px; border-radius:10px; margin-top:8px; border:1px solid #e2e8f0;">
-              <p style="color:#334155;"><strong>🌙 المساء:</strong> ${resJson.routine.evening.join(', ')}</p>
-            </div>
+            <p style="font-size: 11px; color: #94a3b8; margin-top: 12px; text-align: left;">🩺 استشارة الطبيب ضرورية قبل الاستخدام.</p>
           </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
+      } catch (err) { 
+        alert("خطأ: " + err.message); 
+        container.innerHTML = ''; 
+      }
     }
 
+    // ========== الدالة رقم 4: الخوارزميات (لم تتغير) ==========
     async function askGeminiAlgorithm() {
       const query = document.getElementById('algoSearchInput').value.trim();
       if(!query) { alert("برجاء كتابة الحالة الطبية أولاً!"); return; }
@@ -423,10 +474,4 @@
             <h3 style="font-size:14px; color:#b45309; font-weight:800;">${resJson.conditionTitle}</h3>
             <p style="margin-bottom:10px;"><strong>📋 التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
             <div style="background:#fffbeb; padding:12px; border-radius:10px; margin:8px 0; border:1px solid #fef08a; color:#78350f;">${branchesText}</div>
-            <p style="color:#b91c1c; margin-top:8px; background:#fef2f2; padding:8px 12px; border-radius:8px; border:1px solid #fecaca;"><strong>⚠️ علامات الخطر (Red Flags):</strong> ${resJson.redFlags.join(', ')}</p>
-          </div>`;
-      } catch (err) { alert("خطأ: " + err.message); container.innerHTML = ''; }
-    }
-  </script>
-</body>
-</html>
+            <p style="color:#b91c1c; ma
