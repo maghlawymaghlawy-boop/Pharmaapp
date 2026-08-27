@@ -26,7 +26,7 @@
           <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI</p>
         </div>
       </div>
-      <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v2.5 🚀</span>
+      <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v3.6 🚀</span>
     </div>
   </header>
 
@@ -46,7 +46,7 @@
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
         <h2 class="text-sm font-extrabold text-slate-800">التنقل في لوحة التحكم الرئيسية</h2>
         
-        <!-- Compact Cards Grid: 2 or 3 per row -->
+        <!-- Compact Cards Grid -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           
           <!-- Card 1: Drug Assistant -->
@@ -121,7 +121,7 @@
       <div id="aiResultsDrug" class="space-y-4"></div>
     </div>
 
-    <!-- PAGE 2: ALTERNATIVES & GENERICS (NEW) -->
+    <!-- PAGE 2: ALTERNATIVES & GENERICS -->
     <div id="pageAlt" class="page-content hidden space-y-4">
       <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
         <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
@@ -221,7 +221,8 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+      // إضافة CORS Proxy لتجاوز حظر الـ Vercel والفيتا للـ Frontend
+      const url = `https://corsproxy.io/?https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -244,7 +245,7 @@
       const container = document.getElementById('aiResultsDrug');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ تحليل السؤال/المنتج بـ Gemini 3.6...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ تحليل السؤال/المنتج بـ Gemini...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج/الاستفسار", "activeIngredients": ["المادة الفعالة 1"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "طريقة الاستخدام والجرعة الأساسية"}`;
@@ -257,7 +258,7 @@
           <div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 space-y-3 text-xs leading-relaxed">
             <div class="border-b border-gray-100 pb-2 flex justify-between items-start">
               <h3 class="font-extrabold text-base text-teal-900">${resJson.name}</h3>
-              <span class="bg-teal-50 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Gemini 3.6</span>
+              <span class="bg-teal-50 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Gemini AI</span>
             </div>
             <div class="bg-teal-50/60 p-2.5 rounded-xl border border-teal-100 space-y-1">
               <p class="font-bold text-teal-900 text-[11px]">🧪 المكونات الأساسية:</p>
@@ -265,7 +266,7 @@
             </div>
             <div class="space-y-2 text-gray-800">
               <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">🎯 الإجابة / دواعي الاستعمال:</p><p>${resJson.indications}</p></div>
-              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">💊 الجرعة والاستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">💊 الجرعة واستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
             </div>
 
             <!-- Child Dosage Calculator Section -->
@@ -310,7 +311,7 @@
       const container = document.getElementById('aiResultsAlt');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ استخراج المثائل والبدائل المتاحة بـ Gemini 3.6...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جارِ استخراج المثائل والبدائل المتاحة بـ Gemini...</div>`;
 
       try {
         const prompt = `أنت صيدلي خبير بالسوق المصري. اخرج المثائل المتاحة (Generics: نفس المادة الفعالة) والبدائل المتاحة (Substitutes: بديل له نفس التأثير) للدواء التالي: "${query}".
@@ -332,5 +333,4 @@
               <h3 class="font-extrabold text-xs text-emerald-900 mb-2 flex items-center gap-1">🧪 المثائل المتاحة (Generics - نفس المادة الفعالة):</h3>
               <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${genHtml}</ul>
             </div>
-            <div class="border-t border-slate-100 pt-3">
-             
+            
