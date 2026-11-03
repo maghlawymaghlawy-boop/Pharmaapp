@@ -235,7 +235,7 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      // ضبط الموديل على gemini-3.6 بناءً على طلبك
+      // ضبط الموديل على gemini-3.6 تماماً كما طلبت
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
