@@ -235,21 +235,38 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      // ضبط الموديل على gemini-3.6 تماماً كما طلبت
+      // ضبط الرابط بدقة تامة ليتوافق مع نموذج 3.6 وبنيته القياسية
       const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: promptText }]
+            }
+          ]
+        })
       });
 
       const data = await response.json();
-      if (data.error) throw new Error(data.error.message || 'خطأ في API');
-      if (!data.candidates || !data.candidates[0]) throw new Error('لم يتم استلام استجابة صحيحة من السيرفر.');
+      if (data.error) throw new Error(data.error.message || 'خطأ في استجابة API');
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('لم يتم استلام محتوى صحيح من الموديل.');
+      }
 
-      let rawText = data.candidates[0].content.parts[0].text.trim().replace(/```json/g, '').replace(/```/g, '').trim();
-      return JSON.parse(rawText.substring(rawText.indexOf('{'), rawText.lastIndexOf('}') + 1));
+      let rawText = data.candidates[0].content.parts[0].text.trim();
+      rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      
+      const firstBrace = rawText.indexOf('{');
+      const lastBrace = rawText.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        rawText = rawText.substring(firstBrace, lastBrace + 1);
+      }
+
+      return JSON.parse(rawText);
     }
 
     async function askGeminiDrug() {
@@ -257,9 +274,9 @@
       const container = document.getElementById('aiResultsDrug');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري تحليل السؤال والمنتج بـ Gemini...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري تحليل السؤال والمنتج بـ Gemini 3.6...</div>`;
       try {
-        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON فقط بالصيغة: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "الاستخدام والجرعة الأساسية"}`;
+        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON صريح فقط بدون أي نصوص خارجه وبدون علامات markdown بالشكل التالي: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "الاستخدام والجرعة الأساسية"}`;
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
         currentDrugForPediatric = resJson.name;
@@ -268,7 +285,7 @@
         container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 space-y-3 text-xs leading-relaxed">
           <div class="border-b border-gray-100 pb-2 flex justify-between items-start">
             <h3 class="font-extrabold text-base text-teal-900">${resJson.name}</h3>
-            <span class="bg-teal-50 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Gemini AI</span>
+            <span class="bg-teal-50 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Gemini 3.6</span>
           </div>
           <div class="bg-teal-50/60 p-2.5 rounded-xl border border-teal-100 space-y-1">
             <p class="font-bold text-teal-900 text-[11px]">🧪 المكونات الأساسية:</p>
@@ -340,7 +357,7 @@
       resContainer.classList.remove('hidden');
       resContainer.innerHTML = `⏳ جاري حساب الجرعة الدقيقة لوزن ${finalWeight.toFixed(1)} كجم...`;
       try {
-        const prompt = `أنت صيدلي خبير. احسب الجرعة الدقيقة للأطفال بالوزن للدواء التالي: "${currentDrugForPediatric}" لطفل وزنه ${finalWeight.toFixed(1)} كجم. أرجع JSON فقط بالصيغة: {"dose": "مقدار الجرعة بال ml أو mg وعدد المرات يومياً باختصار شديد"}`;
+        const prompt = `أنت صيدلي خبير. احسب الجرعة الدقيقة للأطفال بالوزن للدواء التالي: "${currentDrugForPediatric}" لطفل وزنه ${finalWeight.toFixed(1)} كجم. أرجع JSON فقط بالشكل: {"dose": "مقدار الجرعة بال ml أو mg وعدد المرات يومياً باختصار شديد"}`;
         const resJson = await fetchGemini(prompt);
         resContainer.innerHTML = `✅ **الجرعة المقترحة:** ${resJson.dose}${estInfo}`;
       } catch (err) { resContainer.innerHTML = `❌ حدث خطأ أثناء حساب الجرعة.`; }
@@ -351,9 +368,9 @@
       const container = document.getElementById('aiResultsAlt');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري استخراج المثائل والبدائل بـ Gemini...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري استخراج المثائل والبدائل بـ Gemini 3.6...</div>`;
       try {
-        const prompt = `أنت صيدلي خبير بالسوق المصري. اخرج المثائل المتاحة (Generics - نفس المادة الفعالة) والبدائل المتاحة (Substitutes - بديل له نفس التأثير) للدواء التالي: "${query}". يجب أن تكون الإجابة مختصرة ومرتبة كقوائم فقط وبدون أي مقدمات أو كلام إضافي إطلاقاً. أرجع JSON بالشكل التالي فقط: {"generics": ["مثيل 1", "مثيل 2"], "substitutes": ["بديل 1", "بديل 2"]}`;
+        const prompt = `أنت صيدلي خبير بالسوق المصري. اخرج المثائل المتاحة (Generics) والبدائل المتاحة (Substitutes) للدواء التالي: "${query}". أرجع JSON بالشكل التالي فقط بدون أي نصوص خارجية: {"generics": ["مثيل 1", "مثيل 2"], "substitutes": ["بديل 1", "بديل 2"]}`;
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
@@ -377,9 +394,9 @@
       const container = document.getElementById('aiResultsDerma');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-sky-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري تحليل الحالة وصياغة الروتين بـ Gemini...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-sky-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري تحليل الحالة وصياغة الروتين بـ Gemini 3.6...</div>`;
       try {
-        const prompt = `أنت طبيب جلدي واستشاري تجميل صيدلاني. قم بتحليل مشكلة البشرة/الشعر التالية: "${query}". قدم الإجابة بصيغة JSON فقط بالتراكيب التالية بالعربية: {"diagnosisAndCause": "التشخيص العلمي والسبب باختصار وبساطة", "egyptianProducts": [{"name": "اسم المنتج المتوفر في مصر", "category": "غسول / سيروم / كريم / شامبو", "note": "سبب الاختيار"}], "routine": {"morning": ["خطوة 1", "خطوة 2"], "evening": ["خطوة 1", "خطوة 2"]}}`;
+        const prompt = `أنت طبيب جلدي واستشاري تجميل صيدلاني. قم بتحليل مشكلة البشرة/الشعر التالية: "${query}". أرجع JSON فقط بالشكل التالي بدون أي مقدمات: {"diagnosisAndCause": "التشخيص العلمي والسبب باختصار وبساطة", "egyptianProducts": [{"name": "اسم المنتج المتوفر في مصر", "category": "غسول / سيروم / كريم / شامبو", "note": "سبب الاختيار"}], "routine": {"morning": ["خطوة 1", "خطوة 2"], "evening": ["خطوة 1", "خطوة 2"]}}`;
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
@@ -413,9 +430,9 @@
       const container = document.getElementById('aiResultsAlgo');
       if(!query) return;
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-amber-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري بناء الخريطة الشجرية بـ Gemini...</div>`;
+      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-amber-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري بناء الخريطة الشجرية بـ Gemini 3.6...</div>`;
       try {
-        const prompt = `أنت طبيب استشاري. قم بإنشاء خوارزمية علاجية وطبية شجرية (Clinical Algorithm) للحالة التالية: "${query}". يجب أن تكون الإجابة بصيغة JSON فقط كالتالي: {"conditionTitle": "اسم الحالة أو البروتوكول الطبي", "initialAssessment": "التقييم الأولي / الأعراض الرئيسية", "branches": [{"decisionCriteria": "المعيار أو حالة المريض", "actionStep": "الإجراء السريري أو الخطوة الدوائية الأولى", "nextStep": "الخطوة التالية / المتابعة"}], "redFlags": ["عرض خطير 1", "عرض خطير 2"]}`;
+        const prompt = `أنت طبيب استشاري. قم بإنشاء خوارزمية علاجية وطبية شجرية للحالة التالية: "${query}". أرجع JSON فقط بالشكل التالي بدون نصوص خارجية: {"conditionTitle": "اسم الحالة أو البروتوكول الطبي", "initialAssessment": "التقييم الأولي / الأعراض الرئيسية", "branches": [{"decisionCriteria": "المعيار أو حالة المريض", "actionStep": "الإجراء السريري أو الخطوة الدوائية الأولى", "nextStep": "الخطوة التالية / المتابعة"}], "redFlags": ["عرض خطير 1", "عرض خطير 2"]}`;
         const resJson = await fetchGemini(prompt);
         if(!resJson) return;
 
