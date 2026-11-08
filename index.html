@@ -26,7 +26,7 @@
             <h1 id="headerTitle" class="text-lg font-black flex items-center gap-2">
               <span>🩺</span> لوحة التحكم الطبية والصيدلانية
             </h1>
-            <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span>[cite: 43]</p>
+            <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span></p>
           </div>
         </div>
         <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v3.6 🚀</span>
@@ -172,7 +172,7 @@
 
   <!-- Footer -->
   <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-200 mt-6 bg-white">
-    <p class="font-semibold">تم التطوير بواسطة <span class="text-teal-800 font-extrabold">د/ السعيد مسعد</span> © 2026[cite: 43]</p>
+    <p class="font-semibold">تم التطوير بواسطة <span class="text-teal-800 font-extrabold">د/ السعيد مسعد</span> © 2026</p>
   </footer>
 
   <script>
@@ -235,8 +235,8 @@
       const apiKey = getApiKey();
       if(!apiKey) return null;
 
-      // تحديث المسار بوضع النسخة القياسية المدعومة للموديل 3.6 أو التوافق التام مع الإصدارات
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      // استخدام الموديل القياسي المدعوم والفعال تماماً لجميع الاستدعاءات
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: 'POST',
