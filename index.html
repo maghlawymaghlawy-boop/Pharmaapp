@@ -178,12 +178,23 @@ function safeParseJSON(text){
 }
 
 /* ========= استدعاء Gemini ========= */
+function fetchT(url, opts, ms){
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, {...opts, signal: ctrl.signal}).finally(() => clearTimeout(t));
+}
+function netError(e){
+  if(e && e.name === 'AbortError') return new Error('انتهت المهلة دون رد من خوادم Google. تحقق من الإنترنت (جرّب VPN إن كانت الخدمة محجوبة)، وافتح الملف في المتصفح مباشرة وليس داخل معاينة أو iframe.');
+  return new Error('تعذر الاتصال بخوادم Google (' + (e && e.message || 'خطأ شبكة') + '). تحقق من الإنترنت أو من حظر الاتصال.');
+}
 function getModel(){ try { return localStorage.getItem(MODEL_KEY) || ''; } catch(e){ return window.__m || ''; } }
 function setModel(v){ try { v ? localStorage.setItem(MODEL_KEY, v) : localStorage.removeItem(MODEL_KEY); } catch(e){ window.__m = v; } }
 
 // اكتشاف أحدث نموذج Flash متاح لمفتاحك تلقائياً
 async function detectModels(key){
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`);
+  let res;
+  try { res = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`, {}, 15000); }
+  catch(e){ return []; }
   const data = await res.json().catch(()=>({}));
   if(!res.ok){
     if(res.status===400 || res.status===403) throw new Error('المفتاح غير صالح أو غير مصرح له: ' + (data?.error?.message || res.status));
@@ -211,14 +222,15 @@ async function askGemini(prompt){
 
   let lastErr = 'تعذر الوصول إلى أي نموذج متاح';
   for(const model of candidates){
-    const res = await fetch(`${ENDPOINT(model)}?key=${encodeURIComponent(key)}`, {
+    let res;
+    try { res = await fetchT(`${ENDPOINT(model)}?key=${encodeURIComponent(key)}`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         systemInstruction:{parts:[{text:sys}]},
         contents:[{role:'user',parts:[{text:prompt}]}],
         generationConfig:{temperature:0.3, responseMimeType:'application/json'}
       })
-    });
+    }, 60000); } catch(e){ throw netError(e); }
     const data = await res.json().catch(()=>({}));
     if(res.ok){
       setModel(model);
@@ -236,11 +248,12 @@ async function askGemini(prompt){
 
 async function run(outId, btnId, prompt, render){
   const out = $(outId), btn = $(btnId);
-  out.innerHTML = '<div class="flex items-center gap-3 p-4 text-med-800"><div class="spinner"></div><span>جارٍ التحليل...</span></div>';
+  out.innerHTML = '<div class="flex items-center gap-3 p-4 text-med-800"><div class="spinner"></div><span>جارٍ التحليل... <b id="tick">0</b> ث</span></div>';
   btn.disabled = true; btn.classList.add('opacity-60');
+  let sec = 0; const timer = setInterval(() => { const t = document.getElementById('tick'); if(t) t.textContent = ++sec; }, 1000);
   try { out.innerHTML = render(await askGemini(prompt)); }
   catch(e){ out.innerHTML = `<div role="alert" class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm">${esc(e.message || 'حدث خطأ غير متوقع')}</div>`; }
-  finally { btn.disabled = false; btn.classList.remove('opacity-60'); }
+  finally { clearInterval(timer); btn.disabled = false; btn.classList.remove('opacity-60'); }
 }
 
 /* ========= عناصر العرض ========= */
