@@ -18,9 +18,11 @@ if (window.tailwind) tailwind.config = { theme: { extend: { fontFamily: { cairo:
   body{font-family:'Cairo',Tahoma,sans-serif;background:#f1f5f4;color:#0f172a;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
   .spinner{width:22px;height:22px;border:3px solid #99f6e4;border-top-color:#0f766e;border-radius:50%;animation:spin .8s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .tree{border-right:2px solid #99f6e4;padding-right:14px;margin-right:6px}
+  .tree{border-right:2px solid #99f6e4;padding-right:12px;margin-right:4px}
+  .node>div{overflow-wrap:anywhere}
+  .chip{display:inline-block;background:#0f766e;color:#fff;border-radius:9999px;padding:0 8px;font-size:12px;font-weight:700;margin-left:6px}
   .node{position:relative;margin:8px 0}
-  .node::before{content:"";position:absolute;right:-14px;top:18px;width:12px;border-top:2px solid #99f6e4}
+  .node::before{content:"";position:absolute;right:-12px;top:18px;width:10px;border-top:2px solid #99f6e4}
   :focus-visible{outline:3px solid #0d9488;outline-offset:2px}
   @media (prefers-reduced-motion:reduce){.spinner{animation-duration:2s}}
   @media print{header,#home,.noprint{display:none!important}}
@@ -203,7 +205,22 @@ $('keyTest').onclick = async () => {
 };
 
 /* ========= استخراج JSON بأمان ========= */
+function repairJSON(t){
+  let out='', stack=[], inStr=false, esc=false;
+  for(const ch of t){
+    out+=ch;
+    if(inStr){ if(esc) esc=false; else if(ch==='\\') esc=true; else if(ch==='"') inStr=false; continue; }
+    if(ch==='"') inStr=true;
+    else if(ch==='{'||ch==='[') stack.push(ch);
+    else if(ch==='}'||ch===']') stack.pop();
+  }
+  if(inStr) out+='"';
+  out=out.replace(/[,:\s]+$/,'');
+  while(stack.length) out+=(stack.pop()==='{'?'}':']');
+  return out.replace(/,\s*([}\]])/g,'$1');
+}
 function safeParseJSON(text){
+  safeParseJSON.repaired = false;
   if(!text) throw new Error('رد فارغ');
   let t = String(text).replace(/```json|```/gi,'').trim();
   try { return JSON.parse(t); } catch(e){}
@@ -213,9 +230,16 @@ function safeParseJSON(text){
   const last = t.lastIndexOf(close);
   let chunk = t.slice(first, last + 1);
   try { return JSON.parse(chunk); } catch(e){}
-  // محاولة أخيرة: إزالة الفواصل الزائدة
-  chunk = chunk.replace(/,\s*([}\]])/g,'$1');
-  return JSON.parse(chunk);
+  try { return JSON.parse(chunk.replace(/,\s*([}\]])/g,'$1')); } catch(e){}
+  // الرد مقطوع: أغلق الأقواس المفتوحة واحتفظ بما وصل
+  let cut = t.slice(first);
+  for(let i=0;i<60 && cut.length>2;i++){
+    try { const r = JSON.parse(repairJSON(cut)); safeParseJSON.repaired = true; return r; } catch(e){}
+    const k = cut.lastIndexOf(',');
+    if(k<1) break;
+    cut = cut.slice(0,k);
+  }
+  throw new Error('تعذر قراءة الرد');
 }
 
 /* ========= استدعاء الذكاء الاصطناعي ========= */
@@ -264,7 +288,7 @@ async function askGeminiAPI(prompt, key){
         body: JSON.stringify({
           systemInstruction:{parts:[{text:SYS}]},
           contents:[{role:'user',parts:[{text:prompt}]}],
-          generationConfig:{responseMimeType:'application/json', maxOutputTokens:8192},
+          generationConfig:{responseMimeType:'application/json', maxOutputTokens:16384},
           safetySettings:['HARM_CATEGORY_HARASSMENT','HARM_CATEGORY_HATE_SPEECH','HARM_CATEGORY_SEXUALLY_EXPLICIT','HARM_CATEGORY_DANGEROUS_CONTENT'].map(c=>({category:c,threshold:'BLOCK_ONLY_HIGH'}))
         })
       }, 60000);
@@ -314,7 +338,7 @@ async function askGroqAPI(prompt, key){
     try {
       res = await fetchT(GROQ + '/chat/completions', {
         method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer ' + key},
-        body: JSON.stringify({ model, temperature:0.3, max_tokens:6000, response_format:{type:'json_object'},
+        body: JSON.stringify({ model, temperature:0.3, max_tokens:8000, response_format:{type:'json_object'},
           messages:[{role:'system',content:SYS},{role:'user',content:prompt}] })
       }, 60000);
     } catch(e){ throw netError(e); }
@@ -338,7 +362,7 @@ async function askAI(prompt){
   const key = getKey();
   if(!key){ refreshKeyBox(true); throw new Error('أدخل مفتاح ' + PROVIDERS[prov()].label + ' أولاً من أيقونة 🔑'); }
   const text = prov()==='groq' ? await askGroqAPI(prompt, key) : await askGeminiAPI(prompt, key);
-  try { return safeParseJSON(text); }
+  try { const r = safeParseJSON(text); if(safeParseJSON.repaired && r && typeof r==='object') r.__partial = true; return r; }
   catch(pe){ throw new Error('تعذر قراءة الرد كـ JSON — النموذج: ' + getModel() + '\n' + text.slice(0,300)); }
 }
 
@@ -347,7 +371,7 @@ async function run(outId, btnId, prompt, render){
   out.innerHTML = '<div class="flex items-center gap-3 p-4 text-med-800"><div class="spinner"></div><span>جارٍ التحليل... <b id="tick">0</b> ث</span></div>';
   btn.disabled = true; btn.classList.add('opacity-60');
   let sec = 0; const timer = setInterval(() => { const t = document.getElementById('tick'); if(t) t.textContent = ++sec; }, 1000);
-  try { out.innerHTML = render(await askAI(prompt)); }
+  try { const d = await askAI(prompt); out.innerHTML = render(d) + (d && d.__partial ? '<p class="bg-amber-50 border border-amber-300 text-amber-900 rounded-xl p-3 text-sm mt-3">⚠️ الرد انقطع قبل اكتماله، والنتيجة أعلاه جزئية. أعد المحاولة للحصول على نسخة كاملة.</p>' : ''); }
   catch(e){ out.innerHTML = `<div role="alert" class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm whitespace-pre-wrap break-words">${esc(e.message || 'حدث خطأ غير متوقع')}</div>`; }
   finally { clearInterval(timer); btn.disabled = false; btn.classList.remove('opacity-60'); }
 }
@@ -438,26 +462,34 @@ $('dermBtn').onclick = () => {
 
 /* ========= الخوارزميات الطبية ========= */
 function renderNode(n){
+  if(Array.isArray(n)) return n.map(renderNode).join('');
+  if(typeof n === 'string') n = {type:'action', label:n};
   if(!n || typeof n !== 'object') return '';
   const styles = { assessment:'bg-sky-50 border-sky-300', decision:'bg-amber-50 border-amber-300', action:'bg-med-50 border-med-500' };
   const icons = { assessment:'🔍', decision:'🔀', action:'✅' };
   const t = styles[n.type] ? n.type : 'action';
-  const kids = arr(n.children).map(renderNode).join('');
+  const asNodes = (v, br) => arr(v).map(x => (x && typeof x === 'object') ? {...x, branch: x.branch || br} : {label:String(x), type:'action', branch:br});
+  let kids = arr(n.children || n.next || n.steps || n.branches);
+  if(n.yes) kids = kids.concat(asNodes(n.yes, 'نعم'));
+  if(n.no) kids = kids.concat(asNodes(n.no, 'لا'));
+  const label = n.label || n.title || n.question || n.action || '';
+  const detail = n.detail || n.details || n.description || '';
   return `<div class="node"><div class="border ${styles[t]} rounded-xl p-3 text-sm">
-      <div class="font-bold">${icons[t]} ${esc(n.label || n.title || '')}</div>
-      ${n.detail ? `<div class="text-slate-700 mt-1">${esc(n.detail)}</div>` : ''}
-    </div>${kids ? `<div class="tree">${kids}</div>` : ''}</div>`;
+      <div class="font-bold">${n.branch ? `<span class="chip">${esc(n.branch)}</span>` : ''}${icons[t]} ${esc(label)}</div>
+      ${detail ? `<div class="text-slate-700 mt-1">${esc(Array.isArray(detail) ? detail.join('؛ ') : detail)}</div>` : ''}
+    </div>${kids.length ? `<div class="tree">${kids.map(renderNode).join('')}</div>` : ''}</div>`;
 }
 $('algoBtn').onclick = () => {
   const q = $('algoInput').value.trim(); if(!q) return;
   run('algoOut','algoBtn',
-`أنشئ خوارزمية إكلينيكية (Clinical Algorithm) للحالة: "${q}".
-أرجع JSON بالمفاتيح: {"title":"...","initial_assessment":["عناصر التقييم الأولي"],"tree":{"type":"assessment","label":"...","detail":"...","children":[{"type":"decision","label":"معيار القرار","detail":"...","children":[{"type":"action","label":"الإجراء السريري","detail":"...","children":[]}]}]},"red_flags":["علامات الخطر"],"reference":"المرجع/الإرشادات المعتمدة المبنية عليها"}
-type واحد من: assessment أو decision أو action. اجعل الشجرة 3 إلى 4 مستويات بحد أقصى.`,
+`أنشئ خوارزمية إكلينيكية كاملة (Clinical Algorithm) للحالة: "${q}" بحسب أحدث الإرشادات المعتمدة.
+أرجع JSON بالمفاتيح: {"title":"...","initial_assessment":["عناصر التقييم الأولي: أعراض، علامات حيوية، فحوصات"],"investigations":["الفحوصات المطلوبة"],"tree":{"type":"assessment","label":"...","detail":"...","children":[{"type":"decision","label":"معيار القرار (سؤال أو قيمة)","detail":"...","children":[{"type":"action","branch":"نعم","label":"الإجراء السريري","detail":"الدواء والجرعة أو الإجراء والتوقيت","children":[]},{"type":"action","branch":"لا","label":"...","detail":"...","children":[]}]}]},"red_flags":["علامات الخطر التي تستدعي التحويل أو الطوارئ"],"follow_up":["المتابعة والإحالة"],"reference":"المرجع/الإرشادات المعتمدة"}
+type واحد من: assessment أو decision أو action. كل decision يتفرع إلى مسارين على الأقل، ويحمل كل فرع الحقل branch (نعم/لا أو المعيار مثل "ضغط ≥ 180/120"). اجعل الشجرة 4 إلى 5 مستويات تغطي التقييم ثم التصنيف ثم العلاج ثم المتابعة. اكتب كل detail في جملة قصيرة.`,
   d => `<div class="space-y-3">
-    ${box(d.title || q, `<h4 class="font-bold text-sm mb-1">التقييم الأولي</h4>${list(d.initial_assessment,'text-sm')}`, 'border-med-200')}
+    ${box(d.title || q, `<h4 class="font-bold text-sm mb-1">التقييم الأولي</h4>${list(d.initial_assessment,'text-sm')}${arr(d.investigations).length ? `<h4 class="font-bold text-sm mt-3 mb-1">الفحوصات</h4>${list(d.investigations,'text-sm')}` : ''}`, 'border-med-200')}
     ${warn('علامات الخطر (Red Flags)', d.red_flags)}
-    ${box('مسار القرار السريري', renderNode(d.tree))}
+    ${box('مسار القرار السريري', `<div class="overflow-x-auto">${renderNode(d.tree)}</div>`)}
+    ${arr(d.follow_up).length ? box('المتابعة والإحالة', list(d.follow_up,'text-sm')) : ''}
     ${d.reference?`<p class="text-xs text-slate-500">المرجع: ${esc(d.reference)}</p>`:''}
   </div>`);
 };
