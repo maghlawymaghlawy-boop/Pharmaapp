@@ -47,12 +47,25 @@ if (window.tailwind) tailwind.config = { theme: { extend: { fontFamily: { cairo:
 
   <!-- API key -->
   <section id="keyBox" class="hidden bg-white rounded-2xl border border-med-200 p-4 mb-5">
-    <label for="keyInput" class="block font-bold mb-1">مفتاح Google Gemini API</label>
-    <p class="text-xs text-slate-500 mb-2">يُحفظ على جهازك فقط (localStorage) ولا يُرسل إلا إلى Google.</p>
+    <div class="flex gap-2 mb-3">
+      <div class="flex-1">
+        <label for="provSel" class="block font-bold mb-1">مزوّد الذكاء الاصطناعي</label>
+        <select id="provSel" class="w-full border border-slate-300 rounded-lg px-3 py-2">
+          <option value="gemini">Google Gemini</option>
+          <option value="groq">Groq (بديل إن تعذّر الوصول لـ Google)</option>
+        </select>
+      </div>
+    </div>
+    <label for="keyInput" class="block font-bold mb-1">مفتاح الـ API</label>
+    <p class="text-xs text-slate-500 mb-2">يُحفظ على جهازك فقط (localStorage) ولا يُرسل إلا إلى المزوّد المختار.</p>
     <div class="flex gap-2">
       <input id="keyInput" type="password" dir="ltr" autocomplete="off" placeholder="AIza..." class="flex-1 border border-slate-300 rounded-lg px-3 py-2">
       <button id="keySave" class="bg-med-700 text-white rounded-lg px-4 font-bold">حفظ</button>
       <button id="keyClear" class="border border-slate-300 rounded-lg px-3 text-sm">مسح</button>
+    </div>
+    <div id="baseRow" class="mt-3">
+      <label for="baseInput" class="block text-sm font-bold mb-1">عنوان وسيط لـ Gemini (اختياري)</label>
+      <input id="baseInput" dir="ltr" placeholder="https://your-proxy.workers.dev" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
     </div>
     <div class="mt-3 flex items-center gap-3">
       <button id="keyTest" class="border border-med-600 text-med-800 rounded-lg px-4 py-1.5 text-sm font-bold">اختبار الاتصال</button>
@@ -147,29 +160,46 @@ if (window.tailwind) tailwind.config = { theme: { extend: { fontFamily: { cairo:
 
 <script>
 /* ========= الإعدادات ========= */
-const FALLBACK_MODELS = ['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-2.5-flash']; // احتياطي إن فشل الاكتشاف التلقائي
-const MODEL_KEY = 'gemini_model';
-const ENDPOINT = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
-const KEY_NAME = 'gemini_api_key';
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-/* ========= مفتاح الـ API ========= */
-function getKey(){ try { return localStorage.getItem(KEY_NAME) || ''; } catch(e){ return window.__k || ''; } }
-function setKey(v){ try { v ? localStorage.setItem(KEY_NAME, v) : localStorage.removeItem(KEY_NAME); } catch(e){ window.__k = v; } }
-function refreshKeyBox(forceShow){
-  $('keyBox').classList.toggle('hidden', !!getKey() && !forceShow);
+/* ========= المزوّد والمفاتيح ========= */
+const PROVIDERS = {
+  gemini:{label:'Google Gemini', keyName:'gemini_api_key', modelKey:'gemini_model', ph:'AIza...'},
+  groq:{label:'Groq', keyName:'groq_api_key', modelKey:'groq_model', ph:'gsk_...'}
+};
+const LS = {
+  get(k){ try { return localStorage.getItem(k) || ''; } catch(e){ return (window.__mem||{})[k] || ''; } },
+  set(k,v){ try { v ? localStorage.setItem(k,v) : localStorage.removeItem(k); } catch(e){ (window.__mem = window.__mem||{})[k] = v; } }
+};
+const prov = () => PROVIDERS[LS.get('ai_provider')] ? LS.get('ai_provider') : 'gemini';
+const getKey = () => LS.get(PROVIDERS[prov()].keyName);
+const setKey = v => LS.set(PROVIDERS[prov()].keyName, v);
+const getModel = () => LS.get(PROVIDERS[prov()].modelKey);
+const setModel = v => LS.set(PROVIDERS[prov()].modelKey, v);
+const getBase = () => (LS.get('gemini_base') || 'https://generativelanguage.googleapis.com').replace(/\/+$/,'');
+
+function syncProviderUI(){
+  $('provSel').value = prov();
+  $('keyInput').placeholder = PROVIDERS[prov()].ph;
+  $('baseRow').classList.toggle('hidden', prov() !== 'gemini');
+  $('baseInput').value = LS.get('gemini_base');
+  $('keyStatus').textContent = '';
 }
+function refreshKeyBox(forceShow){ $('keyBox').classList.toggle('hidden', !!getKey() && !forceShow); }
+$('provSel').onchange = () => { LS.set('ai_provider', $('provSel').value); syncProviderUI(); refreshKeyBox(!getKey()); };
+$('baseInput').onchange = () => { const v = $('baseInput').value.trim(); LS.set('gemini_base', v); setModel(''); };
 $('keySave').onclick = () => { const v = $('keyInput').value.trim(); if(!v) return; setKey(v); setModel(''); $('keyInput').value=''; refreshKeyBox(false); };
 $('keyClear').onclick = () => { setKey(''); setModel(''); refreshKeyBox(true); };
 $('keyToggle').onclick = () => $('keyBox').classList.toggle('hidden');
-refreshKeyBox(false);
+syncProviderUI(); refreshKeyBox(false);
 $('keyTest').onclick = async () => {
   const st = $('keyStatus'); const typed = $('keyInput').value.trim();
   if(typed){ setKey(typed); setModel(''); $('keyInput').value=''; }
+  const bv = $('baseInput').value.trim(); if(prov()==='gemini' && bv !== LS.get('gemini_base')){ LS.set('gemini_base', bv); setModel(''); }
   st.className = 'text-sm text-slate-600'; st.textContent = 'جارٍ الاختبار...';
-  try { await askGemini('أرجع JSON بالشكل {"ok":true} فقط'); st.className = 'text-sm text-green-700 font-bold'; st.textContent = 'ناجح ✓ — النموذج: ' + getModel(); }
-  catch(e){ st.className = 'text-sm text-red-700'; st.textContent = e.message; }
+  try { await askAI('أرجع JSON بالشكل {"ok":true} فقط'); st.className = 'text-sm text-green-700 font-bold'; st.textContent = 'ناجح ✓ — ' + PROVIDERS[prov()].label + ' / ' + getModel(); }
+  catch(e){ st.className = 'text-sm text-red-700 whitespace-pre-wrap'; st.textContent = e.message; }
 };
 
 /* ========= استخراج JSON بأمان ========= */
@@ -188,24 +218,27 @@ function safeParseJSON(text){
   return JSON.parse(chunk);
 }
 
-/* ========= استدعاء Gemini ========= */
+/* ========= استدعاء الذكاء الاصطناعي ========= */
+const SYS = 'أنت صيدلي إكلينيكي وطبيب خبير يعمل في مصر. أجب بالعربية الفصحى المبسطة مع إبقاء أسماء الأدوية والمصطلحات الطبية بالإنجليزية عند الحاجة. أرجع كائن JSON صالحاً فقط بالمفاتيح المطلوبة بالضبط، دون أي نص قبله أو بعده ودون علامات Markdown.';
 function fetchT(url, opts, ms){
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), ms);
   return fetch(url, {...opts, signal: ctrl.signal}).finally(() => clearTimeout(t));
 }
 function netError(e){
-  if(e && e.name === 'AbortError') return new Error('انتهت المهلة دون رد من خوادم Google. تحقق من الإنترنت (جرّب VPN إن كانت الخدمة محجوبة)، وافتح الملف في المتصفح مباشرة وليس داخل معاينة أو iframe.');
-  return new Error('تعذر الاتصال بخوادم Google (' + (e && e.message || 'خطأ شبكة') + '). تحقق من الإنترنت أو من حظر الاتصال.');
+  const name = PROVIDERS[prov()].label;
+  const tip = prov()==='gemini' ? ' جرّب: مزوّد Groq من لوحة 🔑، أو VPN، أو عنوان وسيط (Proxy) لـ Gemini.' : ' جرّب VPN أو شبكة أخرى.';
+  if(e && e.name === 'AbortError') return new Error('انتهت المهلة دون رد من خوادم ' + name + '. الاتصال بها محجوب أو بطيء على شبكتك.' + tip);
+  return new Error('تعذر الاتصال بخوادم ' + name + ' (' + (e && e.message || 'خطأ شبكة') + ').' + tip);
 }
-function getModel(){ try { return localStorage.getItem(MODEL_KEY) || ''; } catch(e){ return window.__m || ''; } }
-function setModel(v){ try { v ? localStorage.setItem(MODEL_KEY, v) : localStorage.removeItem(MODEL_KEY); } catch(e){ window.__m = v; } }
+const uniq = a => [...new Set(a.filter(Boolean))];
 
-// اكتشاف أحدث نموذج Flash متاح لمفتاحك تلقائياً
-async function detectModels(key){
+/* ---- Gemini ---- */
+const GEMINI_FALLBACK = ['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-2.5-flash'];
+async function detectGemini(key){
   let res;
-  try { res = await fetchT(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`, {}, 15000); }
-  catch(e){ return []; }
+  try { res = await fetchT(`${getBase()}/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`, {}, 15000); }
+  catch(e){ throw netError(e); }
   const data = await res.json().catch(()=>({}));
   if(!res.ok){
     if(res.status===400 || res.status===403) throw new Error('المفتاح غير صالح أو غير مصرح له: ' + (data?.error?.message || res.status));
@@ -218,31 +251,24 @@ async function detectModels(key){
     .filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n))
     .sort((a,b) => ver(b)-ver(a));
 }
-
-async function askGemini(prompt){
-  const key = getKey();
-  if(!key){ refreshKeyBox(true); throw new Error('أدخل مفتاح Gemini API أولاً من أيقونة 🔑'); }
-  const sys = 'أنت صيدلي إكلينيكي وطبيب خبير يعمل في مصر. أجب بالعربية الفصحى المبسطة مع إبقاء أسماء الأدوية والمصطلحات الطبية بالإنجليزية عند الحاجة. أرجع كائن JSON صالحاً فقط بالمفاتيح المطلوبة بالضبط، دون أي نص قبله أو بعده ودون علامات Markdown.';
-
-  let candidates = [];
+async function askGeminiAPI(prompt, key){
   const saved = getModel();
-  if(saved) candidates.push(saved);
-  else { const found = await detectModels(key); candidates.push(...found); }
-  candidates.push(...FALLBACK_MODELS);
-  candidates = [...new Set(candidates)];
-
+  let cands = saved ? [saved] : await detectGemini(key);
+  cands = uniq([...cands, ...GEMINI_FALLBACK]);
   let lastErr = 'تعذر الوصول إلى أي نموذج متاح';
-  for(const model of candidates){
+  for(const model of cands){
     let res;
-    try { res = await fetchT(`${ENDPOINT(model)}?key=${encodeURIComponent(key)}`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        systemInstruction:{parts:[{text:sys}]},
-        contents:[{role:'user',parts:[{text:prompt}]}],
-        generationConfig:{responseMimeType:'application/json', maxOutputTokens:8192},
-        safetySettings:['HARM_CATEGORY_HARASSMENT','HARM_CATEGORY_HATE_SPEECH','HARM_CATEGORY_SEXUALLY_EXPLICIT','HARM_CATEGORY_DANGEROUS_CONTENT'].map(c=>({category:c,threshold:'BLOCK_ONLY_HIGH'}))
-      })
-    }, 60000); } catch(e){ throw netError(e); }
+    try {
+      res = await fetchT(`${getBase()}/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          systemInstruction:{parts:[{text:SYS}]},
+          contents:[{role:'user',parts:[{text:prompt}]}],
+          generationConfig:{responseMimeType:'application/json', maxOutputTokens:8192},
+          safetySettings:['HARM_CATEGORY_HARASSMENT','HARM_CATEGORY_HATE_SPEECH','HARM_CATEGORY_SEXUALLY_EXPLICIT','HARM_CATEGORY_DANGEROUS_CONTENT'].map(c=>({category:c,threshold:'BLOCK_ONLY_HIGH'}))
+        })
+      }, 60000);
+    } catch(e){ throw netError(e); }
     const data = await res.json().catch(()=>({}));
     if(res.ok){
       setModel(model);
@@ -252,11 +278,10 @@ async function askGemini(prompt){
         const why = data?.promptFeedback?.blockReason ? ('تم حجب الطلب: ' + data.promptFeedback.blockReason) : ('لم يرجع النموذج نصاً' + (cand?.finishReason ? ' (السبب: ' + cand.finishReason + ')' : ''));
         throw new Error(why + ' — النموذج: ' + model);
       }
-      try { return safeParseJSON(text); }
-      catch(pe){ throw new Error('تعذر قراءة الرد كـ JSON' + (cand?.finishReason==='MAX_TOKENS' ? ' (الرد انقطع لطوله)' : '') + ' — النموذج: ' + model + '\n' + text.slice(0,300)); }
+      return text;
     }
     const msg = data?.error?.message || ('خطأ ' + res.status);
-    if(res.status===404){ if(model===saved) setModel(''); lastErr = msg; continue; } // جرّب النموذج التالي
+    if(res.status===404){ if(model===saved) setModel(''); lastErr = msg; continue; }
     if(res.status===400 || res.status===403) throw new Error('المفتاح غير صالح أو غير مصرح له: ' + msg);
     if(res.status===429) throw new Error('تم تجاوز حد الطلبات، حاول بعد قليل.');
     throw new Error(msg);
@@ -264,12 +289,65 @@ async function askGemini(prompt){
   throw new Error('لا يوجد نموذج متاح لحسابك. ' + lastErr);
 }
 
+/* ---- Groq (واجهة متوافقة مع OpenAI) ---- */
+const GROQ = 'https://api.groq.com/openai/v1';
+async function detectGroq(key){
+  let res;
+  try { res = await fetchT(GROQ + '/models', {headers:{Authorization:'Bearer ' + key}}, 15000); }
+  catch(e){ throw netError(e); }
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok){
+    if(res.status===401 || res.status===403) throw new Error('مفتاح Groq غير صالح: ' + (data?.error?.message || res.status));
+    return [];
+  }
+  const ids = (data.data||[]).map(m=>m.id).filter(id => !/whisper|guard|tts|embed|orpheus|playai|distil|safeguard/i.test(id));
+  const pref = ['llama-3.3-70b-versatile','openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.1-8b-instant'];
+  return [...pref.filter(x=>ids.includes(x)), ...ids.filter(i=>!pref.includes(i))];
+}
+async function askGroqAPI(prompt, key){
+  const saved = getModel();
+  let cands = saved ? [saved] : await detectGroq(key);
+  cands = uniq([...cands, 'llama-3.3-70b-versatile','openai/gpt-oss-20b','llama-3.1-8b-instant']);
+  let lastErr = 'تعذر الوصول إلى أي نموذج متاح';
+  for(const model of cands.slice(0,6)){
+    let res;
+    try {
+      res = await fetchT(GROQ + '/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer ' + key},
+        body: JSON.stringify({ model, temperature:0.3, max_tokens:6000, response_format:{type:'json_object'},
+          messages:[{role:'system',content:SYS},{role:'user',content:prompt}] })
+      }, 60000);
+    } catch(e){ throw netError(e); }
+    const data = await res.json().catch(()=>({}));
+    if(res.ok){
+      setModel(model);
+      const text = data?.choices?.[0]?.message?.content || '';
+      if(!text.trim()) throw new Error('لم يرجع النموذج نصاً — النموذج: ' + model);
+      return text;
+    }
+    const msg = data?.error?.message || ('خطأ ' + res.status);
+    if(res.status===401 || res.status===403) throw new Error('مفتاح Groq غير صالح: ' + msg);
+    if(res.status===429) throw new Error('تم تجاوز حد الطلبات في Groq، حاول بعد قليل.');
+    if(res.status===404 || res.status===400){ if(model===saved) setModel(''); lastErr = msg; continue; }
+    throw new Error(msg);
+  }
+  throw new Error('لا يوجد نموذج متاح لحسابك في Groq. ' + lastErr);
+}
+
+async function askAI(prompt){
+  const key = getKey();
+  if(!key){ refreshKeyBox(true); throw new Error('أدخل مفتاح ' + PROVIDERS[prov()].label + ' أولاً من أيقونة 🔑'); }
+  const text = prov()==='groq' ? await askGroqAPI(prompt, key) : await askGeminiAPI(prompt, key);
+  try { return safeParseJSON(text); }
+  catch(pe){ throw new Error('تعذر قراءة الرد كـ JSON — النموذج: ' + getModel() + '\n' + text.slice(0,300)); }
+}
+
 async function run(outId, btnId, prompt, render){
   const out = $(outId), btn = $(btnId);
   out.innerHTML = '<div class="flex items-center gap-3 p-4 text-med-800"><div class="spinner"></div><span>جارٍ التحليل... <b id="tick">0</b> ث</span></div>';
   btn.disabled = true; btn.classList.add('opacity-60');
   let sec = 0; const timer = setInterval(() => { const t = document.getElementById('tick'); if(t) t.textContent = ++sec; }, 1000);
-  try { out.innerHTML = render(await askGemini(prompt)); }
+  try { out.innerHTML = render(await askAI(prompt)); }
   catch(e){ out.innerHTML = `<div role="alert" class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm whitespace-pre-wrap break-words">${esc(e.message || 'حدث خطأ غير متوقع')}</div>`; }
   finally { clearInterval(timer); btn.disabled = false; btn.classList.remove('opacity-60'); }
 }
