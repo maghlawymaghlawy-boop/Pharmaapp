@@ -1,467 +1,351 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الطبية - تطوير د/ السعيد مسعد</title>
-  <!-- ربط تطبيق الموبايل (PWA Manifest) -->
-  <link rel="manifest" href="manifest.json">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; color: #0f172a; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>لوحة التحكم الطبية والصيدلانية - تطوير د/ السعيد مسعد</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = { theme: { extend: { fontFamily: { cairo: ['Cairo','Tahoma','sans-serif'] },
+  colors: { med: { 50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' } } } } };
+</script>
+<style>
+  body{font-family:'Cairo',Tahoma,sans-serif;background:#f1f5f4;color:#0f172a;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .spinner{width:22px;height:22px;border:3px solid #99f6e4;border-top-color:#0f766e;border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .tree{border-right:2px solid #99f6e4;padding-right:14px;margin-right:6px}
+  .node{position:relative;margin:8px 0}
+  .node::before{content:"";position:absolute;right:-14px;top:18px;width:12px;border-top:2px solid #99f6e4}
+  :focus-visible{outline:3px solid #0d9488;outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){.spinner{animation-duration:2s}}
+  @media print{header,#home,.noprint{display:none!important}}
+</style>
 </head>
-<body class="pb-12 min-h-screen flex flex-col justify-between">
+<body class="min-h-screen">
 
-  <div>
-    <!-- Header -->
-    <header class="bg-teal-900 text-white p-4 shadow-xl sticky top-0 z-50">
-      <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
-        <div class="flex items-center gap-3">
-          <button id="backBtn" onclick="showDashboard()" class="hidden bg-teal-800 hover:bg-teal-700 text-white text-xs px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1">
-            <span>➡️</span> العودة للرئيسية
-          </button>
-          <div>
-            <h1 id="headerTitle" class="text-lg font-black flex items-center gap-2">
-              <span>🩺</span> لوحة التحكم الطبية والصيدلانية
-            </h1>
-            <p class="text-[11px] text-teal-200 mt-0.5">منصة الدعم السريري والتجميلي بذكاء Gemini AI • <span class="text-amber-300 font-bold">تطوير د/ السعيد مسعد</span></p>
-          </div>
-        </div>
-        <span class="bg-teal-800 border border-teal-700 text-teal-200 text-xs px-3 py-1 rounded-full font-bold">النسخة الشاملة v3.6 🚀</span>
-      </div>
-    </header>
-
-    <div class="max-w-4xl mx-auto p-4 space-y-4">
-
-      <!-- API Key Section -->
-      <div id="apiKeySection" class="bg-amber-50 border border-amber-200 p-3.5 rounded-2xl text-xs flex flex-col gap-2 shadow-sm">
-        <span class="font-bold text-amber-900">⚠️ إعدادات الربط بـ Gemini (مطلوبة مرة واحدة):</span>
-        <div class="flex gap-2">
-          <input type="password" id="apiKeyInput" placeholder="الصق Gemini API Key هنا..." class="p-2.5 border border-amber-300 rounded-xl w-full text-xs bg-white focus:outline-none focus:ring-2 focus:ring-teal-600" />
-          <button onclick="saveApiKey()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold whitespace-nowrap hover:bg-amber-800 transition">حفظ المفتاح</button>
-        </div>
-      </div>
-
-      <!-- MAIN DASHBOARD PAGE -->
-      <div id="pageDashboard" class="space-y-4">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="text-sm font-extrabold text-slate-800">التنقل في لوحة التحكم الرئيسية</h2>
-          
-          <!-- Compact Cards Grid -->
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <!-- Card 1: Drug Assistant -->
-            <div onclick="openPage('pageDrug')" class="group cursor-pointer p-3 bg-slate-50 border border-teal-500/30 hover:border-teal-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
-              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-teal-600 transition text-xs">↗</span></div>
-              <div class="text-2xl my-auto group-hover:scale-110 transition-transform">💊</div>
-              <div>
-                <h3 class="font-bold text-xs text-slate-800 group-hover:text-teal-900">المساعد الدوائي</h3>
-                <p class="text-[10px] text-slate-500 font-semibold">(Drug Assistant)</p>
-              </div>
-            </div>
-
-            <!-- Card 2: Alternatives & Generics -->
-            <div onclick="openPage('pageAlt')" class="group cursor-pointer p-3 bg-slate-50 border border-emerald-500/30 hover:border-emerald-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
-              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-emerald-600 transition text-xs">↗</span></div>
-              <div class="text-2xl my-auto group-hover:scale-110 transition-transform">🔄</div>
-              <div>
-                <h3 class="font-bold text-xs text-slate-800 group-hover:text-emerald-900">المثائل والبدائل</h3>
-                <p class="text-[10px] text-slate-500 font-semibold">(Generics & Substitutes)</p>
-              </div>
-            </div>
-
-            <!-- Card 3: Hair & Skin Care -->
-            <div onclick="openPage('pageDerma')" class="group cursor-pointer p-3 bg-slate-50 border border-sky-500/30 hover:border-sky-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
-              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-sky-600 transition text-xs">↗</span></div>
-              <div class="text-2xl my-auto group-hover:scale-110 transition-transform">✨</div>
-              <div>
-                <h3 class="font-bold text-xs text-slate-800 group-hover:text-sky-900">الشعر والبشرة</h3>
-                <p class="text-[10px] text-slate-500 font-semibold">(Hair & Skin Care)</p>
-              </div>
-            </div>
-
-            <!-- Card 4: Medical Algorithms -->
-            <div onclick="openPage('pageAlgo')" class="group cursor-pointer p-3 bg-slate-50 border border-amber-500/30 hover:border-amber-600 rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-between text-center relative overflow-hidden h-28">
-              <div class="w-full flex justify-end"><span class="text-slate-400 group-hover:text-amber-600 transition text-xs">↗</span></div>
-              <div class="text-2xl my-auto group-hover:scale-110 transition-transform">🌿</div>
-              <div>
-                <h3 class="font-bold text-xs text-slate-800 group-hover:text-amber-900">الخوارزميات الطبية</h3>
-                <p class="text-[10px] text-slate-500 font-semibold">(Medical Algorithms)</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Search Section -->
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-2">
-          <h3 class="text-xs font-bold text-slate-700">بحث سريع في الخوارزميات والبروتوكولات:</h3>
-          <div class="flex gap-2">
-            <input type="text" id="quickSearchInput" onkeyup="if(event.key === 'Enter') handleQuickSearch()" placeholder="مثال: Hypertension, Diabetes..." class="w-full p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
-            <button onclick="handleQuickSearch()" class="bg-teal-800 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-teal-900 transition whitespace-nowrap text-xs flex items-center gap-1">
-              <span>🔍</span> بحث
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- PAGE 1: DRUG ASSISTANT -->
-      <div id="pageDrug" class="page-content hidden space-y-4">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-teal-900 flex items-center gap-2"><span>💊</span> قسم المساعد الدوائي والسؤال عن المنتج</h2>
-          <div class="space-y-2">
-            <div>
-              <label class="block text-[11px] font-bold text-slate-700 mb-1">اسم الدواء أو السؤال عن المنتج أو المريض:</label>
-              <div class="flex gap-2">
-                <input type="text" id="drugSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDrug()" placeholder="مثال: Augmentin 1gm، هل الآيبوبروفين آمن لمريض ارتفاع الضغط؟..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-teal-600 text-xs" />
-                <button onclick="askGeminiDrug()" class="bg-teal-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-teal-800 transition whitespace-nowrap text-xs">استفسار / بحث 🔍</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div id="aiResultsDrug" class="space-y-4"></div>
-      </div>
-
-      <!-- PAGE 2: ALTERNATIVES & GENERICS -->
-      <div id="pageAlt" class="page-content hidden space-y-4">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-emerald-900 flex items-center gap-2"><span>🔄</span> قسم المثائل والبدائل المتاحة</h2>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-700 mb-1">اسم الدواء المطلوب بحث بدائله:</label>
-            <div class="flex gap-2">
-              <input type="text" id="altSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlternatives()" placeholder="مثال: Panadol, Congestal, Clexane..." class="w-full p-2.5 rounded-xl border border-emerald-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-xs" />
-              <button onclick="askGeminiAlternatives()" class="bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-emerald-800 transition whitespace-nowrap text-xs">عرض المثائل والبدائل 🔄</button>
-            </div>
-          </div>
-        </div>
-        <div id="aiResultsAlt" class="space-y-4"></div>
-      </div>
-
-      <!-- PAGE 3: HAIR & SKIN CARE -->
-      <div id="pageDerma" class="page-content hidden space-y-4">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-sky-900 flex items-center gap-2"><span>✨</span> قسم العناية بالشعر والبشرة</h2>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-700 mb-1">وصف مشكلة البشرة أو الشعر:</label>
-            <div class="flex gap-2">
-              <input type="text" id="dermaSearchInput" onkeyup="if(event.key === 'Enter') askGeminiDerma()" placeholder="مثال: تساقط شعر وراثي، حب شباب هرموني..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-sky-600 text-xs" />
-              <button onclick="askGeminiDerma()" class="bg-sky-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-sky-800 transition whitespace-nowrap text-xs">عرض الحل 💡</button>
-            </div>
-          </div>
-        </div>
-        <div id="aiResultsDerma" class="space-y-4"></div>
-      </div>
-
-      <!-- PAGE 4: MEDICAL ALGORITHMS -->
-      <div id="pageAlgo" class="page-content hidden space-y-4">
-        <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3">
-          <h2 class="font-extrabold text-sm text-amber-900 flex items-center gap-2"><span>🌿</span> قسم الخوارزميات والبروتوكولات الطبية</h2>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-700 mb-1">المشكلة أو الحالة الطبية (Clinical Presentation):</label>
-            <div class="flex gap-2">
-              <input type="text" id="algoSearchInput" onkeyup="if(event.key === 'Enter') askGeminiAlgorithm()" placeholder="مثال: Hypertension, Acute Asthma Exacerbation..." class="w-full p-2.5 rounded-xl border border-teal-200 focus:outline-none focus:ring-2 focus:ring-amber-600 text-xs" />
-              <button onclick="askGeminiAlgorithm()" class="bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-800 transition whitespace-nowrap text-xs">رسم الخريطة 🗺️</button>
-            </div>
-          </div>
-        </div>
-        <div id="aiResultsAlgo" class="space-y-4"></div>
-      </div>
-
+<header class="bg-med-700 text-white sticky top-0 z-20 shadow">
+  <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+    <svg width="38" height="38" viewBox="0 0 40 40" aria-hidden="true" class="shrink-0">
+      <rect width="40" height="40" rx="10" fill="#ccfbf1"/>
+      <path d="M17 8h6v9h9v6h-9v9h-6v-9H8v-6h9z" fill="#0f766e"/>
+    </svg>
+    <div class="flex-1 min-w-0">
+      <h1 class="font-extrabold text-sm sm:text-base leading-tight">لوحة التحكم الطبية والصيدلانية</h1>
+      <p class="text-xs text-med-100">تطوير د/ السعيد مسعد · v3.6</p>
     </div>
+    <button id="backBtn" class="hidden bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 text-sm font-bold whitespace-nowrap">العودة للرئيسية</button>
+    <button id="keyToggle" class="bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 text-sm" title="مفتاح الـ API" aria-label="مفتاح الـ API">🔑</button>
   </div>
+</header>
 
-  <!-- Footer -->
-  <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-200 mt-6 bg-white">
-    <p class="font-semibold">تم التطوير بواسطة <span class="text-teal-800 font-extrabold">د/ السعيد مسعد</span> © 2026</p>
-  </footer>
+<main class="max-w-3xl mx-auto px-4 py-5">
 
-  <script>
-    let currentDrugForPediatric = "";
+  <!-- API key -->
+  <section id="keyBox" class="hidden bg-white rounded-2xl border border-med-200 p-4 mb-5">
+    <label for="keyInput" class="block font-bold mb-1">مفتاح Google Gemini API</label>
+    <p class="text-xs text-slate-500 mb-2">يُحفظ على جهازك فقط (localStorage) ولا يُرسل إلا إلى Google.</p>
+    <div class="flex gap-2">
+      <input id="keyInput" type="password" dir="ltr" autocomplete="off" placeholder="AIza..." class="flex-1 border border-slate-300 rounded-lg px-3 py-2">
+      <button id="keySave" class="bg-med-700 text-white rounded-lg px-4 font-bold">حفظ</button>
+      <button id="keyClear" class="border border-slate-300 rounded-lg px-3 text-sm">مسح</button>
+    </div>
+  </section>
 
-    window.onload = function() {
-      const savedKey = localStorage.getItem('gemini_api_key');
-      if(savedKey) {
-        document.getElementById('apiKeyInput').value = savedKey;
-        document.getElementById('apiKeySection').style.display = 'none';
-      }
-    };
+  <!-- Home -->
+  <section id="home">
+    <div class="bg-white rounded-2xl border border-slate-200 p-3 mb-5 flex gap-2">
+      <input id="quickInput" type="search" placeholder="بحث سريع: دواء، حالة، بروتوكول..." class="flex-1 px-3 py-2 rounded-lg border border-slate-200" aria-label="بحث سريع">
+      <button id="quickBtn" class="bg-med-700 text-white rounded-lg px-4 font-bold">بحث</button>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <button data-go="drug" class="card text-right bg-white rounded-2xl border border-slate-200 p-4 hover:border-med-500">
+        <div class="text-3xl mb-2">💊</div><div class="font-bold">المساعد الدوائي</div><div class="text-xs text-slate-500">معلومات الدواء وجرعات الأطفال</div></button>
+      <button data-go="generic" class="card text-right bg-white rounded-2xl border border-slate-200 p-4 hover:border-med-500">
+        <div class="text-3xl mb-2">🔁</div><div class="font-bold">المثائل والبدائل</div><div class="text-xs text-slate-500">في السوق المصري</div></button>
+      <button data-go="derma" class="card text-right bg-white rounded-2xl border border-slate-200 p-4 hover:border-med-500">
+        <div class="text-3xl mb-2">🧴</div><div class="font-bold">الشعر والبشرة</div><div class="text-xs text-slate-500">تشخيص ومنتجات وروتين</div></button>
+      <button data-go="algo" class="card text-right bg-white rounded-2xl border border-slate-200 p-4 hover:border-med-500">
+        <div class="text-3xl mb-2">🩺</div><div class="font-bold">الخوارزميات الطبية</div><div class="text-xs text-slate-500">بروتوكولات وعلامات الخطر</div></button>
+    </div>
+  </section>
 
-    function saveApiKey() {
-      const key = document.getElementById('apiKeyInput').value.trim();
-      if(key) {
-        localStorage.setItem('gemini_api_key', key);
-        document.getElementById('apiKeySection').style.display = 'none';
-        alert('تم حفظ المفتاح بنجاح! 🚀');
-      } else { 
-        alert('من فضلك أدخل مفتاح صحيح.'); 
-      }
-    }
+  <!-- Drug assistant -->
+  <section id="drug" class="hidden space-y-4">
+    <h2 class="text-xl font-extrabold text-med-800">المساعد الدوائي</h2>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <label for="drugInput" class="font-bold block mb-1">اسم الدواء أو استفسار المريض</label>
+      <textarea id="drugInput" rows="2" class="w-full border border-slate-300 rounded-lg px-3 py-2" placeholder="مثال: بانادول إكسترا، أو: هل يمكن تناول الإيبوبروفين مع الضغط؟"></textarea>
+      <button id="drugBtn" class="mt-2 bg-med-700 text-white rounded-lg px-5 py-2 font-bold">تحليل</button>
+    </div>
+    <div id="drugOut"></div>
 
-    function openPage(pageId) {
-      document.getElementById('pageDashboard').classList.add('hidden');
-      document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(pageId).classList.remove('hidden');
-      document.getElementById('backBtn').classList.remove('hidden');
-      window.scrollTo(0, 0);
-    }
+    <div class="bg-white rounded-2xl border border-med-200 p-4">
+      <h3 class="font-extrabold text-med-800 mb-3">حاسبة جرعات الأطفال</h3>
+      <label for="pedDrug" class="block text-sm font-bold mb-1">الدواء (والتركيز إن وُجد)</label>
+      <input id="pedDrug" class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3" placeholder="مثال: باراسيتامول شراب 120 مجم/5 مل">
+      <div class="flex gap-4 mb-3 text-sm font-bold">
+        <label class="flex items-center gap-1"><input type="radio" name="pedMode" value="weight" checked> حسب الوزن</label>
+        <label class="flex items-center gap-1"><input type="radio" name="pedMode" value="age"> حسب العمر (تقديري)</label>
+      </div>
+      <div id="pedWeight"><label for="pedKg" class="block text-sm font-bold mb-1">الوزن (كجم)</label>
+        <input id="pedKg" type="number" min="0.5" step="0.1" inputmode="decimal" class="w-full border border-slate-300 rounded-lg px-3 py-2"></div>
+      <div id="pedAge" class="hidden flex gap-2">
+        <div class="flex-1"><label for="pedAgeVal" class="block text-sm font-bold mb-1">العمر</label>
+          <input id="pedAgeVal" type="number" min="0" step="1" inputmode="numeric" class="w-full border border-slate-300 rounded-lg px-3 py-2"></div>
+        <div><label for="pedUnit" class="block text-sm font-bold mb-1">الوحدة</label>
+          <select id="pedUnit" class="border border-slate-300 rounded-lg px-3 py-2"><option value="سنوات">سنوات</option><option value="أشهر">أشهر</option></select></div>
+      </div>
+      <button id="pedBtn" class="mt-3 bg-med-700 text-white rounded-lg px-5 py-2 font-bold">احسب الجرعة</button>
+    </div>
+    <div id="pedOut"></div>
+  </section>
 
-    function showDashboard() {
-      document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById('pageDashboard').classList.remove('hidden');
-      document.getElementById('backBtn').classList.add('hidden');
-      window.scrollTo(0, 0);
-    }
+  <!-- Generics -->
+  <section id="generic" class="hidden space-y-4">
+    <h2 class="text-xl font-extrabold text-med-800">المثائل والبدائل</h2>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <label for="genInput" class="font-bold block mb-1">الاسم التجاري للدواء</label>
+      <input id="genInput" class="w-full border border-slate-300 rounded-lg px-3 py-2" placeholder="مثال: أوجمنتين">
+      <button id="genBtn" class="mt-2 bg-med-700 text-white rounded-lg px-5 py-2 font-bold">استخراج المثائل والبدائل</button>
+    </div>
+    <div id="genOut"></div>
+  </section>
 
-    function handleQuickSearch() {
-      const val = document.getElementById('quickSearchInput').value.trim();
-      if(val) {
-        openPage('pageAlgo');
-        document.getElementById('algoSearchInput').value = val;
-        askGeminiAlgorithm();
-      }
-    }
+  <!-- Derma -->
+  <section id="derma" class="hidden space-y-4">
+    <h2 class="text-xl font-extrabold text-med-800">العناية بالشعر والبشرة</h2>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <label for="dermInput" class="font-bold block mb-1">صف المشكلة</label>
+      <textarea id="dermInput" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2" placeholder="مثال: تساقط شعر وراثي، أو: حب شباب في الوجه مع بشرة دهنية"></textarea>
+      <button id="dermBtn" class="mt-2 bg-med-700 text-white rounded-lg px-5 py-2 font-bold">تحليل</button>
+    </div>
+    <div id="dermOut"></div>
+  </section>
 
-    function getApiKey() {
-      const key = localStorage.getItem('gemini_api_key') || document.getElementById('apiKeyInput').value.trim();
-      if(!key) {
-        alert('برجاء إدخال وحفظ Gemini API Key أولاً.');
-        document.getElementById('apiKeySection').style.display = 'flex';
-        return null;
-      }
-      return key;
-    }
+  <!-- Algorithms -->
+  <section id="algo" class="hidden space-y-4">
+    <h2 class="text-xl font-extrabold text-med-800">الخوارزميات والبروتوكولات الطبية</h2>
+    <div class="bg-white rounded-2xl border border-slate-200 p-4">
+      <label for="algoInput" class="font-bold block mb-1">الحالة أو البروتوكول</label>
+      <input id="algoInput" class="w-full border border-slate-300 rounded-lg px-3 py-2" placeholder="مثال: Hypertension أو Acute Asthma">
+      <button id="algoBtn" class="mt-2 bg-med-700 text-white rounded-lg px-5 py-2 font-bold">إنشاء الخوارزمية</button>
+    </div>
+    <div id="algoOut"></div>
+  </section>
 
-    async function fetchGemini(promptText) {
-      const apiKey = getApiKey();
-      if(!apiKey) return null;
+  <p class="text-center text-xs text-slate-500 mt-8 leading-relaxed">المحتوى مُولَّد بالذكاء الاصطناعي لأغراض مساعدة الاختصاصي فقط، ويجب مراجعته مع المراجع الدوائية المعتمدة قبل أي قرار علاجي أو صرف جرعة.</p>
+</main>
 
-      // استخدام الموديل القياسي المدعوم والفعال تماماً لجميع الاستدعاءات
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+<script>
+/* ========= الإعدادات ========= */
+const MODEL = 'gemini-1.5-flash'; // يمكن تغييره إلى أحدث نموذج متاح لحسابك
+const ENDPOINT = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
+const KEY_NAME = 'gemini_api_key';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: promptText }]
-            }
-          ]
-        })
-      });
+/* ========= مفتاح الـ API ========= */
+function getKey(){ try { return localStorage.getItem(KEY_NAME) || ''; } catch(e){ return window.__k || ''; } }
+function setKey(v){ try { v ? localStorage.setItem(KEY_NAME, v) : localStorage.removeItem(KEY_NAME); } catch(e){ window.__k = v; } }
+function refreshKeyBox(forceShow){
+  $('keyBox').classList.toggle('hidden', !!getKey() && !forceShow);
+}
+$('keySave').onclick = () => { const v = $('keyInput').value.trim(); if(!v) return; setKey(v); $('keyInput').value=''; refreshKeyBox(false); };
+$('keyClear').onclick = () => { setKey(''); refreshKeyBox(true); };
+$('keyToggle').onclick = () => $('keyBox').classList.toggle('hidden');
+refreshKeyBox(false);
 
-      const data = await response.json();
-      if (data.error) throw new Error(data.error.message || 'خطأ في استجابة API');
-      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-        throw new Error('لم يتم استلام محتوى صحيح من الموديل.');
-      }
+/* ========= استخراج JSON بأمان ========= */
+function safeParseJSON(text){
+  if(!text) throw new Error('رد فارغ');
+  let t = String(text).replace(/```json|```/gi,'').trim();
+  try { return JSON.parse(t); } catch(e){}
+  const first = t.search(/[\{\[]/);
+  if(first === -1) throw new Error('لا يوجد JSON في الرد');
+  const open = t[first], close = open === '{' ? '}' : ']';
+  const last = t.lastIndexOf(close);
+  let chunk = t.slice(first, last + 1);
+  try { return JSON.parse(chunk); } catch(e){}
+  // محاولة أخيرة: إزالة الفواصل الزائدة
+  chunk = chunk.replace(/,\s*([}\]])/g,'$1');
+  return JSON.parse(chunk);
+}
 
-      let rawText = data.candidates[0].content.parts[0].text.trim();
-      rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-      
-      const firstBrace = rawText.indexOf('{');
-      const lastBrace = rawText.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace !== -1) {
-        rawText = rawText.substring(firstBrace, lastBrace + 1);
-      }
+/* ========= استدعاء Gemini ========= */
+async function askGemini(prompt){
+  const key = getKey();
+  if(!key){ refreshKeyBox(true); throw new Error('أدخل مفتاح Gemini API أولاً من أيقونة 🔑'); }
+  const sys = 'أنت صيدلي إكلينيكي وطبيب خبير يعمل في مصر. أجب بالعربية الفصحى المبسطة مع إبقاء أسماء الأدوية والمصطلحات الطبية بالإنجليزية عند الحاجة. أرجع كائن JSON صالحاً فقط بالمفاتيح المطلوبة بالضبط، دون أي نص قبله أو بعده ودون علامات Markdown.';
+  const res = await fetch(`${ENDPOINT(MODEL)}?key=${encodeURIComponent(key)}`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      systemInstruction:{parts:[{text:sys}]},
+      contents:[{role:'user',parts:[{text:prompt}]}],
+      generationConfig:{temperature:0.3, responseMimeType:'application/json'}
+    })
+  });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok){
+    const msg = data?.error?.message || ('خطأ ' + res.status);
+    if(res.status===400 || res.status===403) throw new Error('المفتاح غير صالح أو غير مصرح له: ' + msg);
+    if(res.status===404) throw new Error('النموذج غير متاح لحسابك، غيّر قيمة MODEL في الكود. ' + msg);
+    if(res.status===429) throw new Error('تم تجاوز حد الطلبات، حاول بعد قليل.');
+    throw new Error(msg);
+  }
+  const text = (data?.candidates?.[0]?.content?.parts || []).map(p=>p.text||'').join('');
+  return safeParseJSON(text);
+}
 
-      return JSON.parse(rawText);
-    }
+async function run(outId, btnId, prompt, render){
+  const out = $(outId), btn = $(btnId);
+  out.innerHTML = '<div class="flex items-center gap-3 p-4 text-med-800"><div class="spinner"></div><span>جارٍ التحليل...</span></div>';
+  btn.disabled = true; btn.classList.add('opacity-60');
+  try { out.innerHTML = render(await askGemini(prompt)); }
+  catch(e){ out.innerHTML = `<div role="alert" class="bg-red-50 border border-red-200 text-red-800 rounded-xl p-4 text-sm">${esc(e.message || 'حدث خطأ غير متوقع')}</div>`; }
+  finally { btn.disabled = false; btn.classList.remove('opacity-60'); }
+}
 
-    async function askGeminiDrug() {
-      const query = document.getElementById('drugSearchInput').value.trim();
-      const container = document.getElementById('aiResultsDrug');
-      if(!query) return;
+/* ========= عناصر العرض ========= */
+const arr = v => Array.isArray(v) ? v : (v ? [v] : []);
+const list = (items, cls='') => `<ul class="list-disc pr-5 space-y-1 ${cls}">${arr(items).map(i=>`<li>${esc(typeof i==='object'?JSON.stringify(i):i)}</li>`).join('')}</ul>`;
+const box = (title, body, tone='border-slate-200') => `<div class="bg-white rounded-2xl border ${tone} p-4"><h3 class="font-extrabold text-med-800 mb-2">${esc(title)}</h3>${body}</div>`;
+const warn = (title, items) => arr(items).length ? `<div class="bg-red-50 border border-red-300 rounded-2xl p-4"><h3 class="font-extrabold text-red-800 mb-2">⚠️ ${esc(title)}</h3>${list(items,'text-red-900')}</div>` : '';
 
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-teal-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري تحليل السؤال والمنتج بـ Gemini...</div>`;
-      try {
-        const prompt = `أنت صيدلي خبير. قم بتحليل الطلب أو السؤال التالي: "${query}". أرجع JSON صريح فقط بدون أي نصوص خارجه وبدون علامات markdown بالشكل التالي: {"name": "اسم المنتج", "activeIngredients": ["المادة الفعالة"], "indications": "دواعي الاستعمال والإجابة المباشرة", "dosageAndUsage": "الاستخدام والجرعة الأساسية"}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-        currentDrugForPediatric = resJson.name;
+/* ========= المساعد الدوائي ========= */
+$('drugBtn').onclick = () => {
+  const q = $('drugInput').value.trim(); if(!q) return;
+  run('drugOut','drugBtn',
+`الاستفسار: "${q}"
+أرجع JSON بالمفاتيح: {"name":"اسم الدواء/الموضوع","active_ingredients":["..."],"drug_class":"...","indications":["..."],"general_dose":"الجرعة العامة للبالغين","contraindications":["..."],"warnings":["..."],"answer":"رد مختصر على استفسار المريض إن وُجد"}`,
+  d => `<div class="space-y-3">
+    ${box(d.name || 'النتيجة', `<p class="text-sm text-slate-600 mb-2">${esc(d.drug_class||'')}</p>${d.answer?`<p class="mb-2">${esc(d.answer)}</p>`:''}`, 'border-med-200')}
+    ${box('المكونات الأساسية', list(d.active_ingredients))}
+    ${box('دواعي الاستعمال', list(d.indications))}
+    ${box('الجرعة العامة', `<p>${esc(d.general_dose)}</p>`)}
+    ${warn('موانع وتحذيرات', [...arr(d.contraindications), ...arr(d.warnings)])}
+  </div>`);
+};
 
-        let ingredientsHtml = resJson.activeIngredients.map(item => `<li class="flex items-center gap-1.5 text-xs text-gray-800 font-medium"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span><span>${item}</span></li>`).join('');
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-teal-100 space-y-3 text-xs leading-relaxed">
-          <div class="border-b border-gray-100 pb-2 flex justify-between items-start">
-            <h3 class="font-extrabold text-base text-teal-900">${resJson.name}</h3>
-            <span class="bg-teal-50 text-teal-700 text-[10px] px-2 py-0.5 rounded-full font-bold">Gemini AI</span>
-          </div>
-          <div class="bg-teal-50/60 p-2.5 rounded-xl border border-teal-100 space-y-1">
-            <p class="font-bold text-teal-900 text-[11px]">🧪 المكونات الأساسية:</p>
-            <ul class="space-y-1 pr-1">${ingredientsHtml}</ul>
-          </div>
-          <div class="space-y-2 text-gray-800">
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">🎯 الإجابة / دواعي الاستعمال:</p><p>${resJson.indications}</p></div>
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100"><p class="font-bold text-teal-800 text-[11px] mb-0.5">💊 الجرعة والاستخدام العام:</p><p>${resJson.dosageAndUsage}</p></div>
-          </div>
-          
-          <!-- Child Dosage Calculator Section -->
-          <div class="bg-sky-50 p-3 rounded-xl border border-sky-200 space-y-2 mt-3">
-            <p class="font-bold text-sky-900 text-xs flex items-center gap-1">👶 حاسبة جرعة الأطفال (Pediatric Dose Calculator):</p>
-            <div class="flex gap-2 mb-1 text-[11px]">
-              <label class="flex items-center gap-1 cursor-pointer font-bold text-sky-900"><input type="radio" name="pediaCalcType" value="weight" checked onchange="togglePediaInputs()" /> حسب الوزن مباشرة</label>
-              <label class="flex items-center gap-1 cursor-pointer font-bold text-sky-900 mr-2"><input type="radio" name="pediaCalcType" value="age" onchange="togglePediaInputs()" /> العمر (تقدير الوزن)</label>
-            </div>
-            <div id="pediaWeightGroup" class="flex gap-2">
-              <input type="number" id="pediaWeightInput" placeholder="أدخل وزن الطفل (كجم)..." class="w-full p-2 border border-sky-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-sky-600 bg-white" />
-            </div>
-            <div id="pediaAgeGroup" class="hidden flex gap-2">
-              <input type="number" id="pediaAgeInput" placeholder="أدخل العمر..." class="w-2/3 p-2 border border-sky-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-sky-600 bg-white" />
-              <select id="pediaAgeUnit" class="w-1/3 p-2 border border-sky-300 rounded-lg text-xs bg-white font-bold text-sky-900">
-                <option value="years">سنوات</option>
-                <option value="months">أشهر</option>
-              </select>
-            </div>
-            <button onclick="calculatePediatricDose()" class="bg-sky-700 text-white w-full py-2 rounded-lg font-bold hover:bg-sky-800 transition text-xs">🧮 حساب الجرعة</button>
-            <div id="pediatricResult" class="hidden mt-2 p-2.5 bg-white rounded-lg border border-sky-200 text-sky-950 font-bold text-xs"></div>
-          </div>
-        </div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
-    }
+/* ========= حاسبة جرعات الأطفال ========= */
+document.querySelectorAll('input[name=pedMode]').forEach(r => r.onchange = () => {
+  const w = document.querySelector('input[name=pedMode]:checked').value === 'weight';
+  $('pedWeight').classList.toggle('hidden', !w); $('pedAge').classList.toggle('hidden', w);
+});
+$('pedBtn').onclick = () => {
+  const drug = $('pedDrug').value.trim();
+  const mode = document.querySelector('input[name=pedMode]:checked').value;
+  const kg = parseFloat($('pedKg').value), age = parseFloat($('pedAgeVal').value), unit = $('pedUnit').value;
+  const out = $('pedOut');
+  if(!drug){ out.innerHTML = '<p class="text-red-700 text-sm p-2">اكتب اسم الدواء أولاً.</p>'; return; }
+  if(mode==='weight' && !(kg>0)){ out.innerHTML = '<p class="text-red-700 text-sm p-2">أدخل وزناً صحيحاً بالكيلوجرام.</p>'; return; }
+  if(mode==='age' && !(age>=0 && $('pedAgeVal').value!=='')){ out.innerHTML = '<p class="text-red-700 text-sm p-2">أدخل العمر.</p>'; return; }
+  const basis = mode==='weight' ? `وزن الطفل ${kg} كجم` : `عمر الطفل ${age} ${unit} (قدّر الوزن التقريبي من العمر واذكره صراحة)`;
+  run('pedOut','pedBtn',
+`احسب جرعة الأطفال للدواء: "${drug}". المعطيات: ${basis}.
+أرجع JSON بالمفاتيح: {"drug":"...","weight_used_kg":"الوزن المستخدم في الحساب وهل هو فعلي أم تقديري","dose_per_kg":"الجرعة مجم/كجم","single_dose":"الجرعة الواحدة بالمجم وبالمل إن كان شراباً","frequency":"عدد المرات والفاصل بين الجرعات","max_daily_dose":"الحد الأقصى اليومي","calculation":"خطوات الحساب باختصار","cautions":["..."]}
+إن كان الدواء غير مناسب لهذا العمر فاذكر ذلك بوضوح في cautions.`,
+  d => `<div class="space-y-3">
+    ${box('الجرعة المحسوبة: ' + (d.drug||drug),
+      `<div class="bg-med-50 rounded-xl p-3 mb-2"><div class="text-sm text-slate-600">الجرعة الواحدة</div><div class="text-lg font-extrabold text-med-800">${esc(d.single_dose)}</div></div>
+       <dl class="text-sm space-y-1"><div><b>التكرار:</b> ${esc(d.frequency)}</div><div><b>الحد الأقصى اليومي:</b> ${esc(d.max_daily_dose)}</div><div><b>الجرعة/كجم:</b> ${esc(d.dose_per_kg)}</div><div><b>الوزن المستخدم:</b> ${esc(d.weight_used_kg)}</div></dl>`, 'border-med-200')}
+    ${box('طريقة الحساب', `<p class="text-sm">${esc(d.calculation)}</p>`)}
+    ${warn('تنبيهات', d.cautions)}
+    <p class="text-xs text-slate-500">راجع النشرة الداخلية للمنتج والتركيز الفعلي قبل الصرف. الحساب بالعمر تقديري فقط.</p>
+  </div>`);
+};
 
-    function togglePediaInputs() {
-      const type = document.querySelector('input[name="pediaCalcType"]:checked').value;
-      if (type === 'weight') {
-        document.getElementById('pediaWeightGroup').classList.remove('hidden');
-        document.getElementById('pediaAgeGroup').classList.add('hidden');
-      } else {
-        document.getElementById('pediaWeightGroup').classList.add('hidden');
-        document.getElementById('pediaAgeGroup').classList.remove('hidden');
-      }
-    }
+/* ========= المثائل والبدائل ========= */
+$('genBtn').onclick = () => {
+  const q = $('genInput').value.trim(); if(!q) return;
+  const row = i => `<li class="py-2 flex justify-between gap-3 border-b border-slate-100 last:border-0"><span class="font-bold">${esc(i.name)}</span><span class="text-xs text-slate-500 text-left">${esc(i.company||'')} ${i.note?'· '+esc(i.note):''}</span></li>`;
+  run('genOut','genBtn',
+`الدواء التجاري: "${q}" في السوق المصري.
+أرجع JSON بالمفاتيح: {"brand":"...","active_ingredient":"المادة الفعالة والتركيز","generics":[{"name":"اسم تجاري","company":"الشركة","note":"التركيز/الشكل"}],"substitutes":[{"name":"...","company":"...","note":"سبب كونه بديلاً (نفس المجموعة/التأثير)"}],"remark":"ملاحظة مختصرة"}
+المثائل = نفس المادة الفعالة والتركيز. البدائل = نفس المجموعة العلاجية أو التأثير بمادة مختلفة. اذكر الأدوية التي تعرف أنها متوفرة بمصر فقط ولا تخترع أسماء.`,
+  d => `<div class="space-y-3">
+    ${box(d.brand||q, `<p class="text-sm">المادة الفعالة: <b>${esc(d.active_ingredient)}</b></p>`, 'border-med-200')}
+    ${box('المثائل (نفس المادة الفعالة)', `<ul>${arr(d.generics).map(row).join('') || '<li class="text-sm text-slate-500">لا توجد نتائج</li>'}</ul>`)}
+    ${box('البدائل (نفس المجموعة أو التأثير)', `<ul>${arr(d.substitutes).map(row).join('') || '<li class="text-sm text-slate-500">لا توجد نتائج</li>'}</ul>`)}
+    ${d.remark?`<p class="text-sm text-slate-600">${esc(d.remark)}</p>`:''}
+    <p class="text-xs text-slate-500">تحقق من توفر الصنف وسعره الحالي في المخزون قبل التوصية.</p>
+  </div>`);
+};
 
-    async function calculatePediatricDose() {
-      const type = document.querySelector('input[name="pediaCalcType"]:checked').value;
-      const resContainer = document.getElementById('pediatricResult');
-      let finalWeight = 0;
-      let estInfo = "";
+/* ========= الشعر والبشرة ========= */
+$('dermBtn').onclick = () => {
+  const q = $('dermInput').value.trim(); if(!q) return;
+  run('dermOut','dermBtn',
+`المشكلة: "${q}".
+أرجع JSON بالمفاتيح: {"diagnosis":"التشخيص العلمي المحتمل","cause":"السبب باختصار","products":[{"name":"منتج متوفر بالسوق المصري","category":"الفئة الطبية","use":"طريقة الاستخدام"}],"morning":["خطوات الروتين الصباحي"],"evening":["خطوات الروتين المسائي"],"see_doctor":["متى يجب زيارة طبيب الجلدية"]}
+اذكر منتجات تعرف أنها متوفرة بمصر فقط.`,
+  d => `<div class="space-y-3">
+    ${box('التشخيص المحتمل', `<p class="font-bold mb-1">${esc(d.diagnosis)}</p><p class="text-sm">${esc(d.cause)}</p>`, 'border-med-200')}
+    ${box('منتجات مقترحة', `<ul>${arr(d.products).map(p=>`<li class="py-2 border-b border-slate-100 last:border-0"><div class="flex justify-between gap-2"><b>${esc(p.name)}</b><span class="text-xs bg-med-100 text-med-800 rounded-full px-2 py-0.5 whitespace-nowrap">${esc(p.category)}</span></div><p class="text-sm text-slate-600">${esc(p.use)}</p></li>`).join('')}</ul>`)}
+    <div class="grid sm:grid-cols-2 gap-3">
+      ${box('☀️ روتين الصباح', list(d.morning))}
+      ${box('🌙 روتين المساء', list(d.evening))}
+    </div>
+    ${warn('متى تزور الطبيب', d.see_doctor)}
+  </div>`);
+};
 
-      if (type === 'weight') {
-        finalWeight = parseFloat(document.getElementById('pediaWeightInput').value.trim());
-        if (!finalWeight || finalWeight <= 0) { alert("برجاء إدخال وزن صحيح بالكيلوجرام."); return; }
-      } else {
-        const age = parseFloat(document.getElementById('pediaAgeInput').value.trim());
-        const unit = document.getElementById('pediaAgeUnit').value;
-        if (!age || age <= 0) { alert("برجاء إدخال عمر صحيح."); return; }
-        if (unit === 'months') {
-          finalWeight = (age / 2) + 4;
-        } else {
-          if (age >= 1 && age <= 5) finalWeight = (age * 2) + 8;
-          else if (age > 5 && age <= 12) finalWeight = (age * 3) + 7;
-          else finalWeight = (age * 3) + 5;
-        }
-        estInfo = `<span class="text-[10px] text-sky-700 font-normal"> (تم تقدير الوزن بـ ${finalWeight.toFixed(1)} كجم بناءً على العمر)</span>`;
-      }
+/* ========= الخوارزميات الطبية ========= */
+function renderNode(n){
+  if(!n || typeof n !== 'object') return '';
+  const styles = { assessment:'bg-sky-50 border-sky-300', decision:'bg-amber-50 border-amber-300', action:'bg-med-50 border-med-500' };
+  const icons = { assessment:'🔍', decision:'🔀', action:'✅' };
+  const t = styles[n.type] ? n.type : 'action';
+  const kids = arr(n.children).map(renderNode).join('');
+  return `<div class="node"><div class="border ${styles[t]} rounded-xl p-3 text-sm">
+      <div class="font-bold">${icons[t]} ${esc(n.label || n.title || '')}</div>
+      ${n.detail ? `<div class="text-slate-700 mt-1">${esc(n.detail)}</div>` : ''}
+    </div>${kids ? `<div class="tree">${kids}</div>` : ''}</div>`;
+}
+$('algoBtn').onclick = () => {
+  const q = $('algoInput').value.trim(); if(!q) return;
+  run('algoOut','algoBtn',
+`أنشئ خوارزمية إكلينيكية (Clinical Algorithm) للحالة: "${q}".
+أرجع JSON بالمفاتيح: {"title":"...","initial_assessment":["عناصر التقييم الأولي"],"tree":{"type":"assessment","label":"...","detail":"...","children":[{"type":"decision","label":"معيار القرار","detail":"...","children":[{"type":"action","label":"الإجراء السريري","detail":"...","children":[]}]}]},"red_flags":["علامات الخطر"],"reference":"المرجع/الإرشادات المعتمدة المبنية عليها"}
+type واحد من: assessment أو decision أو action. اجعل الشجرة 3 إلى 4 مستويات بحد أقصى.`,
+  d => `<div class="space-y-3">
+    ${box(d.title || q, `<h4 class="font-bold text-sm mb-1">التقييم الأولي</h4>${list(d.initial_assessment,'text-sm')}`, 'border-med-200')}
+    ${warn('علامات الخطر (Red Flags)', d.red_flags)}
+    ${box('مسار القرار السريري', renderNode(d.tree))}
+    ${d.reference?`<p class="text-xs text-slate-500">المرجع: ${esc(d.reference)}</p>`:''}
+  </div>`);
+};
 
-      resContainer.classList.remove('hidden');
-      resContainer.innerHTML = `⏳ جاري حساب الجرعة الدقيقة لوزن ${finalWeight.toFixed(1)} كجم...`;
-      try {
-        const prompt = `أنت صيدلي خبير. احسب الجرعة الدقيقة للأطفال بالوزن للدواء التالي: "${currentDrugForPediatric}" لطفل وزنه ${finalWeight.toFixed(1)} كجم. أرجع JSON فقط بالشكل: {"dose": "مقدار الجرعة بال ml أو mg وعدد المرات يومياً باختصار شديد"}`;
-        const resJson = await fetchGemini(prompt);
-        resContainer.innerHTML = `✅ **الجرعة المقترحة:** ${resJson.dose}${estInfo}`;
-      } catch (err) { resContainer.innerHTML = `❌ حدث خطأ أثناء حساب الجرعة.`; }
-    }
+/* ========= التنقل ========= */
+const SECTIONS = ['home','drug','generic','derma','algo'];
+function show(id){
+  SECTIONS.forEach(s => $(s).classList.toggle('hidden', s !== id));
+  $('backBtn').classList.toggle('hidden', id === 'home');
+  window.scrollTo({top:0});
+}
+document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => show(b.dataset.go));
+$('backBtn').onclick = () => show('home');
+function quick(){
+  const q = $('quickInput').value.trim(); if(!q) return;
+  show('algo'); $('algoInput').value = q; $('algoBtn').click();
+}
+$('quickBtn').onclick = quick;
+$('quickInput').addEventListener('keydown', e => { if(e.key==='Enter') quick(); });
 
-    async function askGeminiAlternatives() {
-      const query = document.getElementById('altSearchInput').value.trim();
-      const container = document.getElementById('aiResultsAlt');
-      if(!query) return;
-
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-emerald-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري استخراج المثائل والبدائل بـ Gemini...</div>`;
-      try {
-        const prompt = `أنت صيدلي خبير بالسوق المصري. اخرج المثائل المتاحة (Generics) والبدائل المتاحة (Substitutes) للدواء التالي: "${query}". أرجع JSON بالشكل التالي فقط بدون أي نصوص خارجية: {"generics": ["مثيل 1", "مثيل 2"], "substitutes": ["بديل 1", "بديل 2"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        let genHtml = resJson.generics.map(item => `<li class="p-1.5 bg-emerald-50 rounded-lg text-emerald-950 font-bold text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>${item}</li>`).join('');
-        let subHtml = resJson.substitutes.map(item => `<li class="p-1.5 bg-teal-50 rounded-lg text-teal-950 font-bold text-xs flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>${item}</li>`).join('');
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-200 space-y-4">
-          <div>
-            <h3 class="font-extrabold text-xs text-emerald-900 mb-2 flex items-center gap-1">🌿 المثائل المتاحة (Generics - نفس المادة الفعالة)</h3>
-            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${genHtml}</ul>
-          </div>
-          <div class="border-t border-slate-100 pt-3">
-            <h3 class="font-extrabold text-xs text-teal-900 mb-2 flex items-center gap-1">🔄 البدائل المتاحة (Substitutes - نفس المجموعة/التأثير)</h3>
-            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">${subHtml}</ul>
-          </div>
-        </div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
-    }
-
-    async function askGeminiDerma() {
-      const query = document.getElementById('dermaSearchInput').value.trim();
-      const container = document.getElementById('aiResultsDerma');
-      if(!query) return;
-
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-sky-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري تحليل الحالة وصياغة الروتين بـ Gemini...</div>`;
-      try {
-        const prompt = `أنت طبيب جلدي واستشاري تجميل صيدلاني. قم بتحليل مشكلة البشرة/الشعر التالية: "${query}". أرجع JSON فقط بالشكل التالي بدون أي مقدمات: {"diagnosisAndCause": "التشخيص العلمي والسبب باختصار وبساطة", "egyptianProducts": [{"name": "اسم المنتج المتوفر في مصر", "category": "غسول / سيروم / كريم / شامبو", "note": "سبب الاختيار"}], "routine": {"morning": ["خطوة 1", "خطوة 2"], "evening": ["خطوة 1", "خطوة 2"]}}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        let productsHtml = resJson.egyptianProducts.map(p => `<div class="p-2 bg-sky-50/50 rounded-lg border border-sky-200/60 flex flex-col gap-0.5">
-          <div class="flex justify-between items-center"><span class="font-bold text-sky-950 text-xs">${p.name}</span><span class="text-[9px] bg-sky-200 text-sky-900 px-1.5 py-0.5 rounded font-bold">${p.category}</span></div>
-          <p class="text-[10px] text-sky-800">${p.note}</p>
-        </div>`).join('');
-
-        let morningRoutine = resJson.routine.morning.map(step => `<li class="text-xs text-slate-700 flex items-center gap-1"><span class="text-amber-500">☀️</span> ${step}</li>`).join('');
-        let eveningRoutine = resJson.routine.evening.map(step => `<li class="text-xs text-slate-700 flex items-center gap-1"><span class="text-indigo-500">🌙</span> ${step}</li>`).join('');
-
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-3 text-xs">
-          <div class="bg-sky-50 p-3 rounded-xl border border-sky-100">
-            <p class="font-bold text-sky-900 text-xs mb-0.5">🔬 التحليل الطبي والسبب:</p>
-            <p class="text-sky-950 leading-relaxed">${resJson.diagnosisAndCause}</p>
-          </div>
-          <div class="space-y-1.5">
-            <p class="font-bold text-slate-900 text-xs">🛍️ منتجات مقترحة ومتوفرة بالسوق المصري:</p>
-            <div class="grid grid-cols-1 gap-1.5">${productsHtml}</div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1"><p class="font-bold text-slate-800 text-xs">☀️ الروتين الصباحي:</p><ul class="space-y-0.5">${morningRoutine}</ul></div>
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1"><p class="font-bold text-slate-800 text-xs">🌙 الروتين المسائي:</p><ul class="space-y-0.5">${eveningRoutine}</ul></div>
-          </div>
-        </div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
-    }
-
-    async function askGeminiAlgorithm() {
-      const query = document.getElementById('algoSearchInput').value.trim();
-      const container = document.getElementById('aiResultsAlgo');
-      if(!query) return;
-
-      container.innerHTML = `<div class="bg-white p-5 rounded-2xl text-center text-amber-700 font-bold shadow-sm animate-pulse text-xs">⏳ جاري بناء الخريطة الشجرية بـ Gemini...</div>`;
-      try {
-        const prompt = `أنت طبيب استشاري. قم بإنشاء خوارزمية علاجية وطبية شجرية للحالة التالية: "${query}". أرجع JSON فقط بالشكل التالي بدون نصوص خارجية: {"conditionTitle": "اسم الحالة أو البروتوكول الطبي", "initialAssessment": "التقييم الأولي / الأعراض الرئيسية", "branches": [{"decisionCriteria": "المعيار أو حالة المريض", "actionStep": "الإجراء السريري أو الخطوة الدوائية الأولى", "nextStep": "الخطوة التالية / المتابعة"}], "redFlags": ["عرض خطير 1", "عرض خطير 2"]}`;
-        const resJson = await fetchGemini(prompt);
-        if(!resJson) return;
-
-        let treeNodes = resJson.branches.map((b, idx) => `<div class="relative pl-3 border-r-2 border-amber-600 space-y-1 my-2 pr-2">
-          <div class="flex items-center gap-1.5"><span class="bg-amber-700 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">مسار ${idx+1}</span><span class="font-bold text-xs text-amber-900">${b.decisionCriteria}</span></div>
-          <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 text-xs space-y-0.5">
-            <p class="text-slate-800">📌 <strong>الإجراء:</strong> ${b.actionStep}</p>
-            <p class="text-slate-600 text-[11px]">⬇️ <strong>الخطوة التالية:</strong> ${b.nextStep}</p>
-          </div>
-        </div>`).join('');
-
-        let redFlagsHtml = resJson.redFlags.map(rf => `<li class="text-xs text-red-700 font-medium">⚠️ ${rf}</li>`).join('');
-
-        container.innerHTML = `<div class="bg-white p-4 rounded-2xl shadow-sm border border-amber-100 space-y-3">
-          <div class="border-b pb-1.5">
-            <h3 class="font-extrabold text-sm text-amber-900">🧭 الخريطة الشجرية: ${resJson.conditionTitle}</h3>
-            <p class="text-xs text-slate-500 mt-0.5">📋 <strong>التقييم المبدئي:</strong> ${resJson.initialAssessment}</p>
-          </div>
-          <div class="bg-slate-50/50 p-3 rounded-xl border border-slate-200">
-            <p class="font-bold text-xs text-slate-800 mb-1">🌿 مسارات القرار والتصرف الطبي:</p>
-            <div class="space-y-1">${treeNodes}</div>
-          </div>
-          <div class="bg-red-50 p-3 rounded-xl border border-red-200 space-y-1">
-            <p class="font-bold text-red-900 text-xs">⚠️ علامات الخطر (Red Flags):</p>
-            <ul class="space-y-0.5">${redFlagsHtml}</ul>
-          </div>
-        </div>`;
-      } catch (err) { container.innerHTML = `<div class="bg-white p-3 rounded-xl border border-red-200 text-red-600 text-xs text-center font-bold">❌ حدث خطأ: ${err.message}</div>`; }
-    }
-  </script>
+/* ========= PWA: manifest مضمّن ========= */
+(function(){
+  try {
+    const icon = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" rx="10" fill="#0f766e"/><path d="M17 8h6v9h9v6h-9v9h-6v-9H8v-6h9z" fill="#ccfbf1"/></svg>');
+    const manifest = { name:'لوحة التحكم الطبية والصيدلانية', short_name:'لوحة طبية', lang:'ar', dir:'rtl', display:'standalone', background_color:'#f1f5f4', theme_color:'#0f766e', start_url:'.', icons:[{src:icon,sizes:'any',type:'image/svg+xml',purpose:'any'}] };
+    const link = document.createElement('link'); link.rel = 'manifest';
+    link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'}));
+    document.head.appendChild(link);
+  } catch(e){}
+})();
+</script>
 </body>
 </html>
