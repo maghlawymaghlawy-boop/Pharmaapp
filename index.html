@@ -143,7 +143,8 @@ tailwind.config = { theme: { extend: { fontFamily: { cairo: ['Cairo','Tahoma','s
 
 <script>
 /* ========= الإعدادات ========= */
-const MODEL = 'gemini-1.5-flash'; // يمكن تغييره إلى أحدث نموذج متاح لحسابك
+const FALLBACK_MODELS = ['gemini-3.8-flash','gemini-3.7-flash','gemini-3.6-flash','gemini-3.5-flash','gemini-2.5-flash']; // احتياطي إن فشل الاكتشاف التلقائي
+const MODEL_KEY = 'gemini_model';
 const ENDPOINT = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
 const KEY_NAME = 'gemini_api_key';
 const $ = id => document.getElementById(id);
@@ -155,8 +156,8 @@ function setKey(v){ try { v ? localStorage.setItem(KEY_NAME, v) : localStorage.r
 function refreshKeyBox(forceShow){
   $('keyBox').classList.toggle('hidden', !!getKey() && !forceShow);
 }
-$('keySave').onclick = () => { const v = $('keyInput').value.trim(); if(!v) return; setKey(v); $('keyInput').value=''; refreshKeyBox(false); };
-$('keyClear').onclick = () => { setKey(''); refreshKeyBox(true); };
+$('keySave').onclick = () => { const v = $('keyInput').value.trim(); if(!v) return; setKey(v); setModel(''); $('keyInput').value=''; refreshKeyBox(false); };
+$('keyClear').onclick = () => { setKey(''); setModel(''); refreshKeyBox(true); };
 $('keyToggle').onclick = () => $('keyBox').classList.toggle('hidden');
 refreshKeyBox(false);
 
@@ -177,28 +178,60 @@ function safeParseJSON(text){
 }
 
 /* ========= استدعاء Gemini ========= */
+function getModel(){ try { return localStorage.getItem(MODEL_KEY) || ''; } catch(e){ return window.__m || ''; } }
+function setModel(v){ try { v ? localStorage.setItem(MODEL_KEY, v) : localStorage.removeItem(MODEL_KEY); } catch(e){ window.__m = v; } }
+
+// اكتشاف أحدث نموذج Flash متاح لمفتاحك تلقائياً
+async function detectModels(key){
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=200&key=${encodeURIComponent(key)}`);
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok){
+    if(res.status===400 || res.status===403) throw new Error('المفتاح غير صالح أو غير مصرح له: ' + (data?.error?.message || res.status));
+    return [];
+  }
+  const ver = n => parseFloat((n.match(/gemini-(\d+(?:\.\d+)?)/)||[0,0])[1]);
+  return (data.models||[])
+    .filter(m => (m.supportedGenerationMethods||[]).includes('generateContent'))
+    .map(m => m.name.replace('models/',''))
+    .filter(n => /^gemini-\d+(\.\d+)?-flash$/.test(n))
+    .sort((a,b) => ver(b)-ver(a));
+}
+
 async function askGemini(prompt){
   const key = getKey();
   if(!key){ refreshKeyBox(true); throw new Error('أدخل مفتاح Gemini API أولاً من أيقونة 🔑'); }
   const sys = 'أنت صيدلي إكلينيكي وطبيب خبير يعمل في مصر. أجب بالعربية الفصحى المبسطة مع إبقاء أسماء الأدوية والمصطلحات الطبية بالإنجليزية عند الحاجة. أرجع كائن JSON صالحاً فقط بالمفاتيح المطلوبة بالضبط، دون أي نص قبله أو بعده ودون علامات Markdown.';
-  const res = await fetch(`${ENDPOINT(MODEL)}?key=${encodeURIComponent(key)}`, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      systemInstruction:{parts:[{text:sys}]},
-      contents:[{role:'user',parts:[{text:prompt}]}],
-      generationConfig:{temperature:0.3, responseMimeType:'application/json'}
-    })
-  });
-  const data = await res.json().catch(()=>({}));
-  if(!res.ok){
+
+  let candidates = [];
+  const saved = getModel();
+  if(saved) candidates.push(saved);
+  else { const found = await detectModels(key); candidates.push(...found); }
+  candidates.push(...FALLBACK_MODELS);
+  candidates = [...new Set(candidates)];
+
+  let lastErr = 'تعذر الوصول إلى أي نموذج متاح';
+  for(const model of candidates){
+    const res = await fetch(`${ENDPOINT(model)}?key=${encodeURIComponent(key)}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        systemInstruction:{parts:[{text:sys}]},
+        contents:[{role:'user',parts:[{text:prompt}]}],
+        generationConfig:{temperature:0.3, responseMimeType:'application/json'}
+      })
+    });
+    const data = await res.json().catch(()=>({}));
+    if(res.ok){
+      setModel(model);
+      const text = (data?.candidates?.[0]?.content?.parts || []).map(p=>p.text||'').join('');
+      return safeParseJSON(text);
+    }
     const msg = data?.error?.message || ('خطأ ' + res.status);
+    if(res.status===404){ if(model===saved) setModel(''); lastErr = msg; continue; } // جرّب النموذج التالي
     if(res.status===400 || res.status===403) throw new Error('المفتاح غير صالح أو غير مصرح له: ' + msg);
-    if(res.status===404) throw new Error('النموذج غير متاح لحسابك، غيّر قيمة MODEL في الكود. ' + msg);
     if(res.status===429) throw new Error('تم تجاوز حد الطلبات، حاول بعد قليل.');
     throw new Error(msg);
   }
-  const text = (data?.candidates?.[0]?.content?.parts || []).map(p=>p.text||'').join('');
-  return safeParseJSON(text);
+  throw new Error('لا يوجد نموذج متاح لحسابك. ' + lastErr);
 }
 
 async function run(outId, btnId, prompt, render){
